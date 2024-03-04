@@ -4049,7 +4049,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.0b7;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rileytestut.AltStore.AltWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore.AltWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$inherited WIDGET_EXTENSION";
@@ -4080,7 +4080,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.0b7;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rileytestut.AltStore.AltWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore.AltWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$inherited WIDGET_EXTENSION";
@@ -4244,7 +4244,7 @@
 					"$(PROJECT_DIR)/Dependencies/libcurl",
 				);
 				MARKETING_VERSION = 2.0rc;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rileytestut.AltStore;
+				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "AltStore/AltStore-Bridging-Header.h";
@@ -4279,7 +4279,7 @@
 					"$(PROJECT_DIR)/Dependencies/libcurl",
 				);
 				MARKETING_VERSION = 2.0rc;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rileytestut.AltStore;
+				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "AltStore/AltStore-Bridging-Header.h";
@@ -4423,7 +4423,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rileytestut.AltStore.AltMarketplace;
+				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore.AltMarketplace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -4459,7 +4459,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rileytestut.AltStore.AltMarketplace;
+				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore.AltMarketplace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
