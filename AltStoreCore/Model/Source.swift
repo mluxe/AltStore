@@ -23,7 +23,9 @@ public extension Source
     
     #else
     
-    #if ALPHA
+    #if MARKETPLACE
+    static let altStoreSourceURL = URL(string: "https://marketplace.altstore.io")! //TODO: Change to human-facing version
+    #elseif ALPHA
     static let altStoreSourceURL = URL(string: "https://alpha.altstore.io/")!
     #else
     static let altStoreSourceURL = URL(string: "https://apps.altstore.io/")!
