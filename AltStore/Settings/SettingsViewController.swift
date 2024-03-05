@@ -299,6 +299,16 @@ private extension SettingsViewController
     
     func isSectionHidden(_ section: Section) -> Bool
     {
+        #if MARKETPLACE
+        
+        switch section
+        {
+        case .signIn, .account, .appRefresh, .instructions, .macDirtyCow: return true
+        default: return false
+        }
+        
+        #else
+        
         switch section
         {
         case .macDirtyCow:
@@ -307,6 +317,8 @@ private extension SettingsViewController
             
         default: return false
         }
+        
+        #endif
     }
 }
 
