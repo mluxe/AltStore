@@ -73,6 +73,8 @@ class InstallMarketplaceAppViewController: UICollectionViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        
+        self.collectionView.isScrollEnabled = false
                 
         self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: RSTCellContentGenericCellIdentifier)
         self.collectionView.register(ActionButtonCell.self, forCellWithReuseIdentifier: "ActionButtonCell")
@@ -334,5 +336,13 @@ private extension InstallMarketplaceAppViewController
         }, configuration: layoutConfig)
 
         return layout
+    }
+}
+
+extension InstallMarketplaceAppViewController
+{
+    override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool 
+    {
+        return false
     }
 }
