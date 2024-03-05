@@ -166,22 +166,24 @@ extension AppMarketplace
         }
                 
         let task = Task<AsyncManaged<InstalledApp>, Error>(priority: .userInitiated) {
-            try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
-                try await InstallTaskContext.$beginInstallationHandler.withValue(installationHandler) {
-                    do
-                    {
-                        let installedApp = try await self.update(appVersion, presentingViewController: presentingViewController, operation: operation)
-                        await installedApp.perform {
-                            self.finish(operation, result: .success($0), progress: progress)
+            try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
+                try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
+                    try await InstallTaskContext.$beginInstallationHandler.withValue(installationHandler) {
+                        do
+                        {
+                            let installedApp = try await self.update(appVersion, presentingViewController: presentingViewController, operation: operation)
+                            await installedApp.perform {
+                                self.finish(operation, result: .success($0), progress: progress)
+                            }
+                            
+                            return installedApp
                         }
-                        
-                        return installedApp
-                    }
-                    catch
-                    {
-                        self.finish(operation, result: .failure(error), progress: progress)
-                        
-                        throw error
+                        catch
+                        {
+                            self.finish(operation, result: .failure(error), progress: progress)
+                            
+                            throw error
+                        }
                     }
                 }
             }
