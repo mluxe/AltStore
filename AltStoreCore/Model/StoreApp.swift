@@ -14,12 +14,26 @@ import AltSign
 
 public extension StoreApp
 {
+    #if MARKETPLACE
+    
+    #if ALPHA
+    static let altstoreAppID = "io.altstore.AltStore.Alpha"
+    #elseif BETA
+    static let altstoreAppID = "io.altstore.AltStore.Beta"
+    #else
+    static let altstoreAppID = "io.altstore.AltStore"
+    #endif
+    
+    #else
+    
     #if ALPHA
     static let altstoreAppID = "com.rileytestut.AltStore.Alpha"
     #elseif BETA
     static let altstoreAppID = "com.rileytestut.AltStore.Beta"
     #else
     static let altstoreAppID = "com.rileytestut.AltStore"
+    #endif
+    
     #endif
     
     static let dolphinAppID = "me.oatmealdome.dolphinios-njb"
