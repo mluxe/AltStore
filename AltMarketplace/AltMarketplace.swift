@@ -24,9 +24,10 @@ final class AltMarketplace: MarketplaceExtension
     {
         //TODO: Does iOS automatically provide the OAuth Bearer token? Or do we need to provide it ourselves?
         
-        guard let requestURL = request.url, requestURL.path().contains("restore") || requestURL.path().contains("update") else { return nil }
+        let bundleVersion = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as? String ?? ""
+        var additionalHeaders = ["ALT_PAL_VER": bundleVersion]
         
-        var additionalHeaders = [String: String]()
+        guard let requestURL = request.url, requestURL.path().contains("restore") || requestURL.path().contains("update") else { return additionalHeaders }
         
         do
         {
