@@ -57,8 +57,11 @@ class SourcesViewController: UICollectionViewController
         
         self.placeholderView = RSTPlaceholderView(frame: .zero)
         self.placeholderView.translatesAutoresizingMaskIntoConstraints = false
-        self.placeholderView.textLabel.text = NSLocalizedString("Add More Sources!", comment: "")
-        self.placeholderView.detailTextLabel.text = NSLocalizedString("Sources determine what apps are available in AltStore. The more sources you add, the better your AltStore experience will be.\n\nDon’t know where to start? Try adding one of our Recommended Sources!", comment: "")
+        #if MARKETPLACE
+        self.placeholderView.textLabel.text = NSLocalizedString("What are sources?", comment: "")
+        #else
+        self.placeholderView.textLabel.text = NSLocalizedString("Add More Sources", comment: "")
+        #endif
         self.placeholderView.detailTextLabel.textAlignment = .natural
         backgroundView.addSubview(self.placeholderView)
         
@@ -75,6 +78,22 @@ class SourcesViewController: UICollectionViewController
         self.placeholderView.stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15)
         self.placeholderView.stackView.isLayoutMarginsRelativeArrangement = true
         self.placeholderView.stackView.addArrangedSubview(self.placeholderViewButton)
+        
+        var detailText = NSLocalizedString("Sources determine what apps are available in AltStore. The more sources you add, the better your AltStore experience will be.", comment: "")
+        
+        if let sources = UserDefaults.shared.recommendedSources, !sources.isEmpty
+        {
+            detailText += "\n\n"
+            detailText += NSLocalizedString("Don’t know where to start? Try adding one of our Recommended Sources!", comment: "")
+            
+            self.placeholderView.detailTextLabel.text = detailText
+            self.placeholderViewButton.isHidden = false
+        }
+        else
+        {
+            self.placeholderView.detailTextLabel.text = detailText
+            self.placeholderViewButton.isHidden = true
+        }
         
         self.placeholderViewCenterYConstraint = self.placeholderView.safeAreaLayoutGuide.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor, constant: 0)
         

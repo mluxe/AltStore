@@ -170,6 +170,10 @@ private extension AddSourceViewController
                     configuration.footerMode = .supplementary
                     
                 case .failure: configuration.footerMode = .supplementary
+                case .success where (UserDefaults.shared.recommendedSources ?? []).isEmpty:
+                    configuration.headerMode = .supplementary
+                    configuration.footerMode = .supplementary
+                    
                 case .success: configuration.headerMode = .supplementary
                 }
                 
@@ -767,6 +771,16 @@ extension AddSourceViewController: UICollectionViewDelegateFlowLayout
                 
                 footerView.placeholderView.detailTextLabel.isHidden = false
                 footerView.placeholderView.detailTextLabel.text = error.localizedDescription
+                
+                footerView.placeholderView.activityIndicatorView.stopAnimating()
+            }
+            else if (UserDefaults.shared.recommendedSources ?? []).isEmpty
+            {
+                footerView.placeholderView.textLabel.isHidden = false
+                footerView.placeholderView.textLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+                footerView.placeholderView.textLabel.text = NSLocalizedString("Coming Soon!", comment: "")
+                
+                footerView.placeholderView.detailTextLabel.isHidden = true
                 
                 footerView.placeholderView.activityIndicatorView.stopAnimating()
             }
