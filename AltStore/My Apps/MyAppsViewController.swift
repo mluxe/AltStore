@@ -112,6 +112,13 @@ class MyAppsViewController: UICollectionViewController, PeekPopPreviewing
         (self as PeekPopPreviewing).registerForPreviewing(with: self, sourceView: self.collectionView)
         
         NotificationCenter.default.addObserver(self, selector: #selector(MyAppsViewController.didChangeAppIcon(_:)), name: UIApplication.didChangeAppIconNotification, object: nil)
+        
+        #if MARKETPLACE
+        
+        // Hide sideloading button for AltStore PAL.
+        self.navigationItem.leftBarButtonItem = nil
+        
+        #endif
     }
     
     override func viewIsAppearing(_ animated: Bool)
@@ -232,9 +239,9 @@ private extension MyAppsViewController
             cell.bannerView.iconImageView.isIndicatingActivity = true
             
             cell.bannerView.button.isIndicatingActivity = false
-            cell.bannerView.configure(for: app, action: .update)
+            cell.bannerView.configure(for: app, action: .update(installedApp))
             cell.bannerView.subtitleLabel.text = String(format: NSLocalizedString("Version %@", comment: ""), latestSupportedVersion.localizedVersion)
-
+            
             let appName: String
             
             if app.isBeta
@@ -334,6 +341,12 @@ private extension MyAppsViewController
                 cell.deactivateBadge?.transform = CGAffineTransform.identity.scaledBy(x: 0.33, y: 0.33)
             }
             
+            #if MARKETPLACE
+            
+            cell.bannerView.configure(for: installedApp, action: .open(installedApp))
+            
+            #else
+            
             let currentDate = Date()
             
             let numberOfDays = installedApp.expirationDate.numberOfCalendarDays(since: currentDate)
@@ -351,8 +364,6 @@ private extension MyAppsViewController
             cell.bannerView.button.isIndicatingActivity = false
             cell.bannerView.configure(for: installedApp, action: .custom(numberOfDaysText.uppercased()))
             
-            cell.bannerView.iconImageView.isIndicatingActivity = true
-            
             cell.bannerView.buttonLabel.isHidden = false
             cell.bannerView.buttonLabel.text = NSLocalizedString("Expires in", comment: "")
             
@@ -360,6 +371,19 @@ private extension MyAppsViewController
             cell.bannerView.button.addTarget(self, action: #selector(MyAppsViewController.refreshApp(_:)), for: .primaryActionTriggered)
             
             cell.bannerView.button.accessibilityLabel = String(format: NSLocalizedString("Refresh %@", comment: ""), installedApp.name)
+            cell.bannerView.accessibilityLabel? += ". " + String(format: NSLocalizedString("Expires in %@", comment: ""), numberOfDaysText)
+            
+            switch numberOfDays
+            {
+            case 2...3: cell.bannerView.button.tintColor = .refreshOrange
+            case 4...5: cell.bannerView.button.tintColor = .refreshYellow
+            case 6...: cell.bannerView.button.tintColor = .refreshGreen
+            default: cell.bannerView.button.tintColor = .refreshRed
+            }
+            
+            #endif
+            
+            cell.bannerView.iconImageView.isIndicatingActivity = true
             
             if let storeApp = installedApp.storeApp, storeApp.isPledgeRequired, !storeApp.isPledged
             {
@@ -372,18 +396,8 @@ private extension MyAppsViewController
                 cell.bannerView.button.alpha = 1.0
             }
             
-            cell.bannerView.accessibilityLabel? += ". " + String(format: NSLocalizedString("Expires in %@", comment: ""), numberOfDaysText)
-            
             // Make sure refresh button is correct size.
             cell.layoutIfNeeded()
-            
-            switch numberOfDays
-            {
-            case 2...3: cell.bannerView.button.tintColor = .refreshOrange
-            case 4...5: cell.bannerView.button.tintColor = .refreshYellow
-            case 6...: cell.bannerView.button.tintColor = .refreshGreen
-            default: cell.bannerView.button.tintColor = .refreshRed
-            }
             
             if let progress = AppManager.shared.refreshProgress(for: installedApp), progress.fractionCompleted < 1.0
             {
@@ -1678,6 +1692,12 @@ extension MyAppsViewController
                     headerView.textLabel.text = NSLocalizedString("Active", comment: "")
                 }
                 
+                #if MARKETPLACE
+                
+                headerView.button.isHidden = true
+                
+                #else
+                
                 headerView.button.isIndicatingActivity = false
                 headerView.button.activityIndicatorView.color = .altPrimary
                 headerView.button.setTitle(NSLocalizedString("Refresh All", comment: ""), for: .normal)
@@ -1696,6 +1716,8 @@ extension MyAppsViewController
                     headerView.button.isIndicatingActivity = false
                     headerView.button.accessibilityLabel = nil
                 }
+                
+                #endif
             }
             
             return headerView
@@ -1958,6 +1980,12 @@ extension MyAppsViewController
     
     override func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration?
     {
+        #if MARKETPLACE
+        
+        return nil
+        
+        #else
+        
         let section = Section(rawValue: indexPath.section)!
         switch section
         {
@@ -1970,6 +1998,8 @@ extension MyAppsViewController
                 return menu
             }
         }
+        
+        #endif
     }
     
     override func collectionView(_ collectionView: UICollectionView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview?
