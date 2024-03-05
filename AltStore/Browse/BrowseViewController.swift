@@ -599,11 +599,6 @@ private extension BrowseViewController
             }
         }
     }
-    
-    func open(_ installedApp: InstalledApp)
-    {
-        UIApplication.shared.open(installedApp.openAppURL)
-    }
 }
 
 extension BrowseViewController: UICollectionViewDelegateFlowLayout

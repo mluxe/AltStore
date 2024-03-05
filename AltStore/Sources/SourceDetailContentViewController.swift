@@ -441,11 +441,6 @@ private extension SourceDetailContentViewController
         self.collectionView.reloadSections([Section.featuredApps.rawValue])
     }
     
-    func open(_ installedApp: InstalledApp)
-    {
-        UIApplication.shared.open(installedApp.openAppURL)
-    }
-    
     @objc func didChangeApps(_ notification: Notification)
     {
         // Make sure to include refreshed objects to catch all merged changes.

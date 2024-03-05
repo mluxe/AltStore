@@ -139,14 +139,14 @@ class AppBannerView: RSTNibView
         self.actionButtonContainerView = UIView()
         self.actionButtonContainerView.translatesAutoresizingMaskIntoConstraints = false
         self.actionButtonContainerView.backgroundColor = .blue
-        self.addSubview(self.actionButtonContainerView)
+//        self.addSubview(self.actionButtonContainerView)
         
-        NSLayoutConstraint.activate([
-            self.actionButtonContainerView.leadingAnchor.constraint(equalTo: self.button.leadingAnchor),
-            self.actionButtonContainerView.trailingAnchor.constraint(equalTo: self.button.trailingAnchor),
-            self.actionButtonContainerView.topAnchor.constraint(equalTo: self.button.topAnchor),
-            self.actionButtonContainerView.bottomAnchor.constraint(equalTo: self.button.bottomAnchor),
-        ])
+//        NSLayoutConstraint.activate([
+//            self.actionButtonContainerView.leadingAnchor.constraint(equalTo: self.button.leadingAnchor),
+//            self.actionButtonContainerView.trailingAnchor.constraint(equalTo: self.button.trailingAnchor),
+//            self.actionButtonContainerView.topAnchor.constraint(equalTo: self.button.topAnchor),
+//            self.actionButtonContainerView.bottomAnchor.constraint(equalTo: self.button.bottomAnchor),
+//        ])
     }
     
     override func tintColorDidChange()
@@ -461,8 +461,8 @@ extension AppBannerView
 //                    actionButton.cornerRadius = self.button.layer.cornerRadius
                     
                     // Uncomment these lines ton add it back
-                    _actionButton = actionButton
-                    self.actionButtonContainerView.addSubview(actionButton)
+//                    _actionButton = actionButton
+//                    self.actionButtonContainerView.addSubview(actionButton)
                     
 //                    self.actionButtonContainerView.setNeedsLayout()
                     

@@ -544,11 +544,6 @@ private extension FeaturedViewController
             }
         }
     }
-    
-    func open(_ installedApp: InstalledApp)
-    {
-        UIApplication.shared.open(installedApp.openAppURL)
-    }
 }
 
 extension FeaturedViewController

@@ -390,7 +390,7 @@ private extension AppViewController
         if let installedApp = self.app.installedApp, let latestVersion = self.app.latestAvailableVersion, !installedApp.matches(latestVersion), !self.app.isPledgeRequired || self.app.isPledged
         {
             // Explicitly set button action to .update if there is an update available, even if it's not supported.
-            buttonAction = .update
+            buttonAction = .update(installedApp)
         }
         
         for button in [self.bannerView.button!, self.navigationBarDownloadButton!]
@@ -587,11 +587,6 @@ extension AppViewController
                 self.update()
             }
         }
-    }
-    
-    func open(_ installedApp: InstalledApp)
-    {
-        UIApplication.shared.open(installedApp.openAppURL)
     }
     
     func updateApp(_ installedApp: InstalledApp, to version: AppVersion)

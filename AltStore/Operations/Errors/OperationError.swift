@@ -41,6 +41,9 @@ extension OperationError
         /* Pledges */
         case pledgeRequired = 1401
         case pledgeInactive = 1402
+        
+        /* MarketplaceKit */
+        case unknownMarketplaceID = 1501
     }
     
     static var cancelled: CancellationError { CancellationError() }
@@ -83,6 +86,10 @@ extension OperationError
     
     static func pledgeInactive(appName: String, file: String = #fileID, line: UInt = #line) -> OperationError {
         OperationError(code: .pledgeInactive, appName: appName, sourceFile: file, sourceLine: line)
+    }
+    
+    static func unknownMarketplaceID(appName: String, file: String = #fileID, line: UInt = #line) -> OperationError {
+        OperationError(code: .unknownMarketplaceID, appName: appName, sourceFile: file, sourceLine: line)
     }
 }
 
@@ -167,6 +174,10 @@ struct OperationError: ALTLocalizedError
         case .pledgeInactive:
             let appName = self.appName ?? NSLocalizedString("this app", comment: "")
             return String(format: NSLocalizedString("Your pledge is no longer active. Please renew it to continue using %@ normally.", comment: ""), appName)
+            
+        case .unknownMarketplaceID:
+            let appName = self.appName ?? NSLocalizedString("this app", comment: "")
+            return String(format: NSLocalizedString("The marketplace ID for %@ could not be determined.", comment: ""), appName)
         }
     }
     private var _failureReason: String?

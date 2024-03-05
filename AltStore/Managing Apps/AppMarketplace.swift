@@ -110,22 +110,24 @@ extension AppMarketplace
         let bundleID = await $storeApp.bundleIdentifier
         
         let task = Task<AsyncManaged<InstalledApp>, Error>(priority: .userInitiated) {
-            try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
-                try await InstallTaskContext.$beginInstallationHandler.withValue(beginInstallationHandler) {
-                    do
-                    {
-                        let installedApp = try await self.install(storeApp, presentingViewController: presentingViewController, operation: operation)
-                        await installedApp.perform {
-                            self.finish(operation, result: .success($0), progress: progress)
+            try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
+                try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
+                    try await InstallTaskContext.$beginInstallationHandler.withValue(beginInstallationHandler) {
+                        do
+                        {
+                            let installedApp = try await self.install(storeApp, presentingViewController: presentingViewController, operation: operation)
+                            await installedApp.perform {
+                                self.finish(operation, result: .success($0), progress: progress)
+                            }
+                            
+                            return installedApp
                         }
-                        
-                        return installedApp
-                    }
-                    catch
-                    {
-                        self.finish(operation, result: .failure(error), progress: progress)
-                        
-                        throw error
+                        catch
+                        {
+                            self.finish(operation, result: .failure(error), progress: progress)
+                            
+                            throw error
+                        }
                     }
                 }
             }
@@ -267,7 +269,7 @@ private extension AppMarketplace
         }
     }
     
-    func verify(_ appVersion: AltStoreCore.AppVersion) throws
+    nonisolated func verify(_ appVersion: AltStoreCore.AppVersion) throws
     {
         if let minOSVersion = appVersion.minOSVersion, !ProcessInfo.processInfo.isOperatingSystemAtLeast(minOSVersion)
         {
@@ -285,7 +287,6 @@ private extension AppMarketplace
         var storeApp: StoreApp
         
         guard let _app = await $appVersion.app else {
-            //TODO: Make this a proper error
             let failureReason = NSLocalizedString("The app listing could not be found.", comment: "")
             throw OperationError.unknown(failureReason: failureReason)
         }
@@ -293,22 +294,20 @@ private extension AppMarketplace
         
         //TODO: Latest available, or latest supported?
         guard let marketplaceID = await $storeApp.marketplaceID else {
-            //TODO: Make this a proper error
-            let failureReason = await String(format: NSLocalizedString("The marketplace ID for %@ could not be determined.", comment: ""), $storeApp.name)
-            throw OperationError.unknown(failureReason: failureReason)
+            throw await OperationError.unknownMarketplaceID(appName: $storeApp.name)
         }
         
         let bundleID = await $storeApp.bundleIdentifier
         InstallTaskContext.beginInstallationHandler?(bundleID) // TODO: Is this called too early?
         
         let installVerificationToken = try await self.requestInstallToken(bundleID: bundleID)
-        let packageURL = await $appVersion.downloadURL
         
         // Save app info to keychain so MarketplaceExtension can read it.
-        try Keychain.shared.setPendingInstall(for: appVersion, installVerificationToken: installVerificationToken)
+        try await $appVersion.perform {
+            try Keychain.shared.setPendingInstall(for: $0, installVerificationToken: installVerificationToken)
+        }
         
         defer {
-            //TODO: Verify assumption this scope doesn't exit until after app finishes installing.
             do
             {
                 // Remove pending installation info from Keychain.
@@ -319,12 +318,44 @@ private extension AppMarketplace
                 Logger.main.error("Failed to remove pending installation for app \(bundleID). \(error.localizedDescription, privacy: .public)")
             }
         }
+                
+        let installMarketplaceAppViewController = await MainActor.run { () -> InstallMarketplaceAppViewController? in
+            
+            var action: AppBannerView.AppAction?
+            
+            switch operation
+            {
+            case .install(let app):
+                guard let storeApp = app.storeApp else { break }
+                action = .install(storeApp)
+                
+            case .update(let app):
+                guard let installedApp = app as? InstalledApp ?? app.storeApp?.installedApp else { break }
+                action = .update(installedApp)
+                
+            default: break
+            }
+            
+            guard let action else { return nil }
+            
+            let installMarketplaceAppViewController = InstallMarketplaceAppViewController(action: action)
+            return installMarketplaceAppViewController
+        }
         
-        let task: Task<Void, Error>
-        switch operation
+        if let installMarketplaceAppViewController
         {
-        case .update: task = Task { try await AppLibrary.current.requestAppUpdate(for: packageURL, account: AppLibrary.defaultAccount, installVerificationToken: installVerificationToken) }
-        default: task = Task { try await AppLibrary.current.requestAppInstallation(for: packageURL, account: AppLibrary.defaultAccount, installVerificationToken: installVerificationToken) }
+            guard let presentingViewController = InstallTaskContext.presentingViewController else { throw OperationError.unknown(failureReason: NSLocalizedString("Could not determine presenting context.", comment: "")) }
+            
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
+                DispatchQueue.main.async {
+                    installMarketplaceAppViewController.completionHandler = { result in
+                        continuation.resume(with: result)
+                    }
+                    
+                    let navigationController = UINavigationController(rootViewController: installMarketplaceAppViewController)
+                    presentingViewController.present(navigationController, animated: true)
+                }
+            }
         }
         
         let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
@@ -332,10 +363,17 @@ private extension AppMarketplace
         if let installation = await localApp.installation
         {
             InstallTaskContext.progress.addChild(installation.progress, withPendingUnitCount: InstallTaskContext.progress.totalUnitCount)
+            
+            await withCheckedContinuation { continuation in
+                installation.progress.cancellationHandler = {
+                    //TODO: How do we know when progress finishes?
+                    continuation.resume()
+                }
+            }
         }
         
-        try await task.value
-        
+        //TODO: How are errors handled?
+                
         guard let installedMetadata = await localApp.installedMetadata else {
             let failureReason = await String(format: NSLocalizedString("The installed metadata for %@ could not be determined.", comment: ""), $storeApp.name)
             throw OperationError.unknown(failureReason: failureReason) //TODO: Make proper error case
@@ -370,10 +408,14 @@ private extension AppMarketplace
         
         return AsyncManaged(wrappedValue: installedApp)
     }
-    
+}
+
+@available(iOS 17.4, *)
+extension AppMarketplace
+{
     func requestInstallToken(bundleID: String) async throws -> String
     {
-        let requestURL = URL(string: "http://192.168.1.207:7071/api/token")!
+        let requestURL = URL(string: "https://api.altstore.io/install-token")!
         
         let payload = InstallVerificationTokenRequest(bundleID: bundleID)
         let bodyData = try JSONEncoder().encode(payload)

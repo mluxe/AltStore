@@ -386,6 +386,7 @@
 		D557A4812AE85BB0007D0DCF /* Pledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557A4802AE85BB0007D0DCF /* Pledge.swift */; };
 		D557A4832AE85DB7007D0DCF /* PledgeReward.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557A4822AE85DB7007D0DCF /* PledgeReward.swift */; };
 		D557A4852AE88227007D0DCF /* PledgeTier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557A4842AE88227007D0DCF /* PledgeTier.swift */; };
+		D55D3EBD2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */; };
 		D561AF822B21669400BF59C6 /* VerifyAppPledgeOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D561AF812B21669400BF59C6 /* VerifyAppPledgeOperation.swift */; };
 		D561B2EB28EF5A4F006752E4 /* AltSign-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = D561B2EA28EF5A4F006752E4 /* AltSign-Dynamic */; };
 		D561B2ED28EF5A4F006752E4 /* AltSign-Dynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = D561B2EA28EF5A4F006752E4 /* AltSign-Dynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -424,6 +425,7 @@
 		D59A6B7F2AA9226C00F61259 /* AppProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59A6B7D2AA9226C00F61259 /* AppProcess.swift */; };
 		D59A6B822AA92D1C00F61259 /* Process+Conveniences.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59A6B802AA92D1C00F61259 /* Process+Conveniences.swift */; };
 		D59A6B842AA932F700F61259 /* Logger+AltServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59A6B832AA932F700F61259 /* Logger+AltServer.swift */; };
+		D59B43DB2B97546200619B71 /* UIViewController+OpenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59B43DA2B97546200619B71 /* UIViewController+OpenApp.swift */; };
 		D5A0537329B91DB400997551 /* SourceDetailContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A0537229B91DB400997551 /* SourceDetailContentViewController.swift */; };
 		D5A1D2E42AA50EB60066CACC /* JITError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A1D2E32AA50EB60066CACC /* JITError.swift */; };
 		D5A1D2E92AA512940066CACC /* RemoteServiceDiscoveryTunnel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A1D2E82AA512940066CACC /* RemoteServiceDiscoveryTunnel.swift */; };
@@ -457,6 +459,7 @@
 		D5CD805D29CA2C1E00E591B0 /* HeaderContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5CD805C29CA2C1E00E591B0 /* HeaderContentViewController.swift */; };
 		D5CD805F29CA755E00E591B0 /* SourceDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5CD805E29CA755E00E591B0 /* SourceDetailViewController.swift */; };
 		D5CE309C2B4C946300DB8151 /* AltStore15ToAltStore16.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = D5CE309B2B4C946300DB8151 /* AltStore15ToAltStore16.xcmappingmodel */; };
+		D5CF17262B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5CF17252B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift */; };
 		D5CF568C2A0D8EEC006D93E2 /* VerificationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5CF56812A0D83F9006D93E2 /* VerificationError.swift */; };
 		D5DAE0962804DF430034D8D4 /* UpdatePatronsOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DAE0952804DF430034D8D4 /* UpdatePatronsOperation.swift */; };
 		D5DB145A28F9DC5A00A8F606 /* ALTLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DB145828F9DC1000A8F606 /* ALTLocalizedError.swift */; };
@@ -1055,6 +1058,7 @@
 		D557A4802AE85BB0007D0DCF /* Pledge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pledge.swift; sourceTree = "<group>"; };
 		D557A4822AE85DB7007D0DCF /* PledgeReward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeReward.swift; sourceTree = "<group>"; };
 		D557A4842AE88227007D0DCF /* PledgeTier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeTier.swift; sourceTree = "<group>"; };
+		D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = InstallMarketplaceApp.storyboard; sourceTree = "<group>"; };
 		D561AF812B21669400BF59C6 /* VerifyAppPledgeOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAppPledgeOperation.swift; sourceTree = "<group>"; };
 		D56915052AD5D75B00A2B747 /* Regex+Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Regex+Permissions.swift"; sourceTree = "<group>"; };
 		D56915082AD5F3E800A2B747 /* AltTests+Sources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AltTests+Sources.swift"; sourceTree = "<group>"; };
@@ -1096,6 +1100,7 @@
 		D59A6B7D2AA9226C00F61259 /* AppProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProcess.swift; sourceTree = "<group>"; };
 		D59A6B802AA92D1C00F61259 /* Process+Conveniences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Process+Conveniences.swift"; sourceTree = "<group>"; };
 		D59A6B832AA932F700F61259 /* Logger+AltServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+AltServer.swift"; sourceTree = "<group>"; };
+		D59B43DA2B97546200619B71 /* UIViewController+OpenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+OpenApp.swift"; sourceTree = "<group>"; };
 		D5A0537229B91DB400997551 /* SourceDetailContentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceDetailContentViewController.swift; sourceTree = "<group>"; };
 		D5A1D2E32AA50EB60066CACC /* JITError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JITError.swift; sourceTree = "<group>"; };
 		D5A1D2E82AA512940066CACC /* RemoteServiceDiscoveryTunnel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteServiceDiscoveryTunnel.swift; sourceTree = "<group>"; };
@@ -1126,6 +1131,7 @@
 		D5CE309A2B4C93BE00DB8151 /* AltStore 16.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "AltStore 16.xcdatamodel"; sourceTree = "<group>"; };
 		D5CE309B2B4C946300DB8151 /* AltStore15ToAltStore16.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = AltStore15ToAltStore16.xcmappingmodel; sourceTree = "<group>"; };
 		D5CF17242B96821D002EC4C7 /* AltMarketplace.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AltMarketplace.entitlements; sourceTree = "<group>"; };
+		D5CF17252B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallMarketplaceAppViewController.swift; sourceTree = "<group>"; };
 		D5CF56812A0D83F9006D93E2 /* VerificationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationError.swift; sourceTree = "<group>"; };
 		D5DAE0952804DF430034D8D4 /* UpdatePatronsOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePatronsOperation.swift; sourceTree = "<group>"; };
 		D5DB145828F9DC1000A8F606 /* ALTLocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ALTLocalizedError.swift; sourceTree = "<group>"; };
@@ -1979,6 +1985,8 @@
 				BF0C4EBC22A1BD8B009A2DD7 /* AppManager.swift */,
 				BF88F97124F8727D00BB75DF /* AppManagerErrors.swift */,
 				D5AE997A2B64791E0068B366 /* AppMarketplace.swift */,
+				D5CF17252B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift */,
+				D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */,
 			);
 			path = "Managing Apps";
 			sourceTree = "<group>";
@@ -2040,6 +2048,7 @@
 				D5FB28EB2ADDF68D00A1C337 /* UIFontDescriptor+Bold.swift */,
 				D5A645202AF591980047D980 /* UTType+AltStore.swift */,
 				D52C73642B688B2200E8751C /* InstalledApp+LoadIcon.swift */,
+				D59B43DA2B97546200619B71 /* UIViewController+OpenApp.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2900,6 +2909,7 @@
 				BF44EEF3246B3A17002A52F2 /* AltBackup.ipa in Resources */,
 				D56D21422B7D9C41007641C5 /* AltIcons.plist in Resources */,
 				BF770E6922BD57DD002A40FE /* Silence.m4a in Resources */,
+				D55D3EBD2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard in Resources */,
 				BFD247772284B9A700981D42 /* Assets.xcassets in Resources */,
 				BFF0B6922321A305007A79E1 /* AboutPatreonHeaderView.xib in Resources */,
 				BFB6B22423187A3D0022A802 /* NewsCollectionViewCell.xib in Resources */,
@@ -3444,6 +3454,7 @@
 				D56D21402B7D9942007641C5 /* AltAppIconsViewController.swift in Sources */,
 				BFB3645A2325985F00CD0EB1 /* FindServerOperation.swift in Sources */,
 				D52EF2BE2A0594550096C377 /* AppDetailCollectionViewController.swift in Sources */,
+				D5CF17262B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift in Sources */,
 				D569A5042AF9BC5F00A4CB8B /* ReviewPermissionsViewController.swift in Sources */,
 				BF3BEFBF2408673400DE7D55 /* FetchProvisioningProfilesOperation.swift in Sources */,
 				D5A645212AF591980047D980 /* UTType+AltStore.swift in Sources */,
@@ -3455,6 +3466,7 @@
 				D5AE997B2B64791E0068B366 /* AppMarketplace.swift in Sources */,
 				D52C8F012AFC144C00CA0BDD /* FeaturedViewController.swift in Sources */,
 				BF56D2AF23DF9E310006506D /* AppIDsViewController.swift in Sources */,
+				D59B43DB2B97546200619B71 /* UIViewController+OpenApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

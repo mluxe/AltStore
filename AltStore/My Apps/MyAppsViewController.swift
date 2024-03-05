@@ -345,6 +345,9 @@ private extension MyAppsViewController
             
             cell.bannerView.configure(for: installedApp, action: .open(installedApp))
             
+            cell.bannerView.button.removeTarget(self, action: nil, for: .primaryActionTriggered)
+            cell.bannerView.button.addTarget(self, action: #selector(MyAppsViewController.openApp(_:)), for: .primaryActionTriggered)
+            
             #else
             
             let currentDate = Date()
@@ -803,6 +806,15 @@ private extension MyAppsViewController
         
     }
     
+    @IBAction func openApp(_ sender: UIButton)
+    {
+        let point = self.collectionView.convert(sender.center, from: sender.superview)
+        guard let indexPath = self.collectionView.indexPathForItem(at: point) else { return }
+        
+        let installedApp = self.dataSource.item(at: indexPath)
+        self.open(installedApp)
+    }
+    
     @IBAction func sideloadApp(_ sender: UIBarButtonItem)
     {
         let supportedTypes = UTType.types(tag: "ipa", tagClass: .filenameExtension, conformingTo: nil)
@@ -1154,16 +1166,6 @@ private extension MyAppsViewController
 
 private extension MyAppsViewController
 {
-    func open(_ installedApp: InstalledApp)
-    {
-        UIApplication.shared.open(installedApp.openAppURL) { success in
-            guard !success else { return }
-            
-            let toastView = ToastView(error: OperationError.openAppFailed(name: installedApp.name))
-            toastView.show(in: self)
-        }
-    }
-    
     func refresh(_ installedApp: InstalledApp)
     {
         let previousProgress = AppManager.shared.refreshProgress(for: installedApp)

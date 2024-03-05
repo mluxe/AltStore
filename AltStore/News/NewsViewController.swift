@@ -373,11 +373,6 @@ private extension NewsViewController
             }
         }
     }
-    
-    func open(_ installedApp: InstalledApp)
-    {
-        UIApplication.shared.open(installedApp.openAppURL)
-    }
 }
 
 private extension NewsViewController
