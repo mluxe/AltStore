@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MarketplaceKit
 
 import AltStoreCore
 import Roxas
@@ -23,12 +24,24 @@ extension AppBannerView
         case source
     }
     
-    enum AppAction
+    enum AppAction: Equatable
     {
-        case install
-        case open
-        case update
+        case install(StoreApp)
+        case open(AppProtocol)
+        case update(InstalledApp)
         case custom(String)
+        
+        static func ==(lhs: AppAction, rhs: AppAction) -> Bool
+        {
+            return switch (lhs, rhs)
+            {
+            case (.install(let appA), .install(let appB)): appA.bundleIdentifier == appB.bundleIdentifier //TODO: Use marketplaceID as well
+            case (.open(let appA), .open(let appB)): appA.bundleIdentifier == appB.bundleIdentifier
+            case (.update(let appA), .update(let appB)): appA.bundleIdentifier == appB.bundleIdentifier
+            case (.custom(let titleA), .custom(let titleB)): titleA == titleB
+            case (.install, _), (.open, _), (.update, _), (.custom, _): false
+            }
+        }
     }
 }
 
@@ -62,6 +75,18 @@ class AppBannerView: RSTNibView
     var style: Style = .app
     
     private var originalTintColor: UIColor?
+    private var previousAppAction: AppAction?
+    
+    @available(iOS 17.4, *)
+    private var actionButton: ActionButton? {
+        get { _actionButton as? ActionButton }
+        set { _actionButton = newValue }
+    }
+    private var _actionButton: UIControl?
+    
+    private var actionButtonContainerView: UIView!
+    
+    var actionButtonCallback: ((AsyncManaged<StoreApp>, AsyncManaged<AltStoreCore.AppVersion>) -> Void)?
     
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var subtitleLabel: UILabel!
@@ -110,6 +135,18 @@ class AppBannerView: RSTNibView
         
         self.stackView.isLayoutMarginsRelativeArrangement = true
         self.stackView.preservesSuperviewLayoutMargins = true
+        
+        self.actionButtonContainerView = UIView()
+        self.actionButtonContainerView.translatesAutoresizingMaskIntoConstraints = false
+        self.actionButtonContainerView.backgroundColor = .blue
+        self.addSubview(self.actionButtonContainerView)
+        
+        NSLayoutConstraint.activate([
+            self.actionButtonContainerView.leadingAnchor.constraint(equalTo: self.button.leadingAnchor),
+            self.actionButtonContainerView.trailingAnchor.constraint(equalTo: self.button.trailingAnchor),
+            self.actionButtonContainerView.topAnchor.constraint(equalTo: self.button.topAnchor),
+            self.actionButtonContainerView.bottomAnchor.constraint(equalTo: self.button.bottomAnchor),
+        ])
     }
     
     override func tintColorDidChange()
@@ -122,6 +159,14 @@ class AppBannerView: RSTNibView
         }
         
         self.update()
+    }
+    
+    override func layoutSubviews() 
+    {
+        super.layoutSubviews()
+        
+//        self.actionButton?.size = self.actionButtonContainerView.bounds.size
+//        self.actionButton?.center = CGPoint(x: self.actionButtonContainerView.bounds.midX, y: self.actionButtonContainerView.bounds.midY)
     }
 }
 
@@ -235,23 +280,23 @@ extension AppBannerView
                 
                 if installedApp.isUpdateAvailable
                 {
-                    buttonAction = .update
+                    buttonAction = .update(installedApp)
                 }
                 else
                 {
-                    buttonAction = .open
+                    buttonAction = .open(installedApp)
                 }
             }
             else
             {
                 // App is not installed
-                buttonAction = .install
+                buttonAction = .install(storeApp)
             }
         }
         else
         {
             // App is not from a source, fall back to .open
-            buttonAction = .open
+            buttonAction = .open(app)
         }
         
         UIView.performWithoutAnimation {
@@ -328,6 +373,104 @@ extension AppBannerView
                     self.button.countdownDate = nil
                 }
             }
+            
+            #if MARKETPLACE
+            
+            if buttonAction != self.previousAppAction, #available(iOS 17.4, *)
+            {
+                // Add ActionButton as subview so we can trigger Martketplace APIs.
+                
+                let uuid = UUID()
+                
+//                if let actionButton
+//                {
+//                    actionButton.removeFromSuperview()
+//                    self.actionButton = nil
+//                    
+//                    Logger.main.info("Removing ActionButton: \(uuid, privacy: .public)")
+//                }
+                
+                var action: ActionButton.Action?
+                
+                switch buttonAction
+                {
+                case .open(let app):
+                    guard let storeApp = app.storeApp, let marketplaceID = storeApp.marketplaceID else { break } //TOOD: Should InstalledApp have it's own reference to marketplaceID?
+                    action = .launch(marketplaceID)
+                    
+                case .install(let storeApp):
+                    //TODO: How do we handle fallback of downloading older iOS version if we have to pick the not-latest version? Does provided URL not matter?
+                    // JK, it'll only ever fall back to latestSupportedVersion, so just supply that
+                    guard let marketplaceID = storeApp.marketplaceID, let downloadURL = storeApp.latestSupportedVersion?.downloadURL else { break }
+                                    
+                    //TODO: Do accounts matter?
+                    let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: false),
+                                                      confirmInstall: {
+                        
+                        do
+                        {
+                            let (installToken, appVersion) = try await AppMarketplace.shared.prepareInstall(for: storeApp, presentingViewController: nil)
+                            
+                            Task {
+                                await self.actionButtonCallback?(AsyncManaged(wrappedValue: storeApp), appVersion)
+                            }
+                                                    
+                            return .confirmed(installVerificationToken: installToken, authenticationContext: nil)
+                        }
+                        catch
+                        {
+                            return .cancel
+                        }
+                    })
+                    
+                    action = .install(config)
+                    
+                case .update(let installedApp):
+                    guard let storeApp = installedApp.storeApp, let marketplaceID = storeApp.marketplaceID, let downloadURL = storeApp.latestSupportedVersion?.downloadURL else { break }
+                    
+                    let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: true),
+                                                      confirmInstall: {
+                        do
+                        {
+                            let (installToken, appVersion) = try await AppMarketplace.shared.prepareInstall(for: storeApp, presentingViewController: nil)
+                            
+                            Task {
+                                await self.actionButtonCallback?(AsyncManaged(wrappedValue: storeApp), appVersion)
+                            }
+                                                    
+                            return .confirmed(installVerificationToken: installToken, authenticationContext: nil)
+                        }
+                        catch
+                        {
+                            return .cancel
+                        }
+                    })
+                    action = .install(config)
+                    
+                case .custom: action = .launch(0) //TOD: Put in AltStore app ID
+                }
+                
+                if let action, _actionButton == nil
+                {
+                    let actionButton = ActionButton(action: action)
+                    actionButton.backgroundColor = .red
+                    actionButton.label = "Hi"
+                    actionButton.size = self.actionButtonContainerView.bounds.size
+                    actionButton.center = CGPoint(x: self.actionButtonContainerView.bounds.midX, y: self.actionButtonContainerView.bounds.midY)
+//                    actionButton.center = self.button.center
+//                    actionButton.cornerRadius = self.button.layer.cornerRadius
+                    
+                    // Uncomment these lines ton add it back
+                    _actionButton = actionButton
+                    self.actionButtonContainerView.addSubview(actionButton)
+                    
+//                    self.actionButtonContainerView.setNeedsLayout()
+                    
+                    Logger.main.info("Adding ActionButton: \(uuid, privacy: .public)")
+                }
+            }
+            
+            #endif
             
             // Ensure PillButton is correct size before assigning progress.
             self.layoutIfNeeded()
@@ -422,5 +565,11 @@ private extension AppBannerView
                 self.vibrancyView.effect = textVibrancyEffect
             }
         }
+    }
+    
+    @available(iOS 17.4, *)
+    @objc func performMarketplaceAction(_ sender: ActionButton)
+    {
+        //self.button.sendActions(for: .primaryActionTriggered)
     }
 }
