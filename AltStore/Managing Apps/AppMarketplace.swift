@@ -410,10 +410,11 @@ private extension AppMarketplace
         {
             let installedApp = try result.get()
             
-            if installedApp.bundleIdentifier == StoreApp.altstoreAppID
-            {
-                AppManager.shared.scheduleExpirationWarningLocalNotification(for: installedApp)
-            }
+            // DON'T schedule expiration warning for Marketplace version.
+            // if installedApp.bundleIdentifier == StoreApp.altstoreAppID
+            // {
+            //     AppManager.shared.scheduleExpirationWarningLocalNotification(for: installedApp)
+            // }
             
             let event: AnalyticsManager.Event?
             
