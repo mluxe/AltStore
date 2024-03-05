@@ -154,10 +154,12 @@ extension AppMarketplace
         let installationHandler = { (bundleID: String) in
             if bundleID == StoreApp.altstoreAppID
             {
-                // AltStore will quit before installation finishes,
-                // so assume if we get this far the update will finish successfully.
-                let event = AnalyticsManager.Event.updatedApp(installedApp)
-                AnalyticsManager.shared.trackEvent(event)
+                DispatchQueue.main.async {
+                    // AltStore will quit before installation finishes,
+                    // so assume if we get this far the update will finish successfully.
+                    let event = AnalyticsManager.Event.updatedApp(installedApp)
+                    AnalyticsManager.shared.trackEvent(event)
+                }
             }
             
             beginInstallationHandler?(bundleID)
