@@ -136,7 +136,7 @@ extension AppMarketplace
                     try await InstallTaskContext.$beginInstallationHandler.withValue(beginInstallationHandler) {
                         do
                         {
-                            let installedApp = try await self.install(storeApp, presentingViewController: presentingViewController, operation: operation)
+                            let installedApp = try await self.install(storeApp, preferredVersion: nil, presentingViewController: presentingViewController, operation: operation)
                             await installedApp.perform {
                                 self.finish(operation, result: .success($0), progress: progress)
                             }
@@ -161,8 +161,8 @@ extension AppMarketplace
     {
         let (appName, bundleID) = await $installedApp.perform { ($0.name, $0.bundleIdentifier) }
         
-        let latestSupportedVersion = await $installedApp.perform({ $0.storeApp?.latestSupportedVersion })
-        guard let appVersion = version ?? latestSupportedVersion else {
+        let (storeApp, latestSupportedVersion) = await $installedApp.perform({ ($0.storeApp, $0.storeApp?.latestSupportedVersion) })
+        guard let storeApp, let appVersion = version ?? latestSupportedVersion else {
             let task = Task<AsyncManaged<InstalledApp>, Error> { throw OperationError.appNotFound(name: appName) }
             return (task, Progress.discreteProgress(totalUnitCount: 1))
         }
@@ -192,7 +192,7 @@ extension AppMarketplace
                     try await InstallTaskContext.$beginInstallationHandler.withValue(installationHandler) {
                         do
                         {
-                            let installedApp = try await self.update(appVersion, presentingViewController: presentingViewController, operation: operation)
+                            let installedApp = try await self.install(storeApp, preferredVersion: appVersion, presentingViewController: presentingViewController, operation: operation)
                             await installedApp.perform {
                                 self.finish(operation, result: .success($0), progress: progress)
                             }
@@ -217,33 +217,48 @@ extension AppMarketplace
 @available(iOS 17.4, *)
 private extension AppMarketplace
 {
-    func install(@AsyncManaged _ storeApp: StoreApp, presentingViewController: UIViewController?, operation: AppManager.AppOperation) async throws -> AsyncManaged<InstalledApp>
+    func install(@AsyncManaged _ storeApp: StoreApp,
+                 preferredVersion: AltStoreCore.AppVersion?,
+                 presentingViewController: UIViewController?,
+                 operation: AppManager.AppOperation) async throws -> AsyncManaged<InstalledApp>
     {
         // Verify pledge
         try await self.verifyPledge(for: storeApp, presentingViewController: presentingViewController)
         
         // Verify version is supported
-        guard let latestAppVersion = await $storeApp.latestAvailableVersion else {
-            let failureReason = await String(format: NSLocalizedString("The latest version of %@ could not be determined.", comment: ""), $storeApp.name)
-            throw OperationError.unknown(failureReason: failureReason) //TODO: Make proper error case
-        }
+        @AsyncManaged
+        var appVersion: AltStoreCore.AppVersion
         
-        var appVersion = latestAppVersion
+        if let preferredVersion
+        {
+            appVersion = preferredVersion
+        }
+        else
+        {
+            guard let latestAppVersion = await $storeApp.latestAvailableVersion else {
+                let failureReason = await String(format: NSLocalizedString("The latest version of %@ could not be determined.", comment: ""), $storeApp.name)
+                throw OperationError.unknown(failureReason: failureReason) //TODO: Make proper error case
+            }
+            
+            appVersion = latestAppVersion
+        }
         
         do
         {
             // Verify app version is supported
             try await $storeApp.perform { _ in
-                try self.verify(latestAppVersion)
+                try self.verify(appVersion)
             }
         }
         catch let error as VerificationError where error.code == .iOSVersionNotSupported
         {
             guard let presentingViewController, let latestSupportedVersion = await $storeApp.latestSupportedVersion else { throw error }
             
-            if let installedApp = await $storeApp.installedApp
-            {
-                guard !installedApp.matches(latestSupportedVersion) else { throw error }
+            try await $storeApp.perform { storeApp in
+                if let installedApp = storeApp.installedApp
+                {
+                    guard !installedApp.matches(latestSupportedVersion) else { throw error }
+                }
             }
             
             let title = NSLocalizedString("Unsupported iOS Version", comment: "")
@@ -255,18 +270,6 @@ private extension AppMarketplace
             
             appVersion = latestSupportedVersion
         }
-        
-        // Install app
-        let installedApp = try await self._install(appVersion, operation: operation)
-        return installedApp
-    }
-    
-    func update(@AsyncManaged _ appVersion: AltStoreCore.AppVersion, presentingViewController: UIViewController?, operation: AppManager.AppOperation) async throws -> AsyncManaged<InstalledApp>
-    {
-        guard let storeApp = await $appVersion.storeApp else { throw await OperationError.appNotFound(name: $appVersion.name) }
-        
-        // Verify pledge
-        try await self.verifyPledge(for: storeApp, presentingViewController: presentingViewController)
         
         // Install app
         let installedApp = try await self._install(appVersion, operation: operation)
