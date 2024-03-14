@@ -375,19 +375,106 @@ private extension AppMarketplace
         
         while true
         {
+            // Wait until app is finished installing...
+            
             let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
             
-            let (installation, installedMetadata) = await MainActor.run {
-                (localApp.installation, localApp.installedMetadata)
+            let (isInstalled, installation, installedMetadata) = await MainActor.run {
+                // isInstalled is not reliable, but we use it for logging purposes.
+                (localApp.isInstalled, localApp.installation, localApp.installedMetadata)
             }
-            
-            // Can't rely on localApp.isInstalled to be accurate.
-            let isInstalled = await AppLibrary.current.installedApps.contains(where: { $0.id == marketplaceID })
-            
+                        
             Logger.sideload.info("Installing app \(bundleID, privacy: .public)... Installed: \(isInstalled). Metadata: \(String(describing: installedMetadata), privacy: .public). Installation: \(String(describing: installation), privacy: .public)")
                                     
-            if isInstalled
+            if let installation
             {
+                // App is currently being installed.
+                
+                if !didAddChildProgress
+                {
+                    InstallTaskContext.progress.addChild(installation.progress, withPendingUnitCount: InstallTaskContext.progress.totalUnitCount)
+                    didAddChildProgress = true
+                }
+                
+                if installation.progress.fractionCompleted != 1.0
+                {
+                    // Progress has not yet completed, so add it as child and wait for it to complete.
+                    
+                    while true
+                    {
+                        do
+                        {
+                            try await withTimeout(seconds: 5.0) {
+                                var observation: NSKeyValueObservation?
+                                
+                                defer {
+                                    observation?.invalidate()
+                                }
+                                
+                                // Yes, we need to observe both fractionCompleted AND cancellationHandler to know if installation completes.
+                                await withCheckedContinuation { continuation in
+                                    observation = installation.progress.observe(\.fractionCompleted, options: [.initial, .new]) { progress, change in
+                                        Logger.sideload.info("Installation Progress for \(bundleID, privacy: .public): \(progress.fractionCompleted)")
+                                        
+                                        if progress.fractionCompleted == 1.0
+                                        {
+                                            continuation.resume()
+                                        }
+                                    }
+                                    
+                                    installation.progress.cancellationHandler = {
+                                        Logger.sideload.info("Cancelled installation for \(bundleID, privacy: .public)!")
+                                        //TODO: Is this safe?
+                                        continuation.resume()
+                                    }
+                                }
+                            }
+                            
+                            break
+                        }
+                        catch let error as TimedOutError
+                        {
+                            Logger.sideload.error("Installation (potentially) timed-out after \(error.duration) seconds.")
+                            
+                            // Manually check whether app finished installing or not.
+                            // If app.installation is nil, we can assume that is has.
+                            
+                            let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
+                            if await localApp.installation != nil
+                            {
+                                // App is still installing, so perform inner loop again.
+                                continue
+                            }
+                            
+                            // App is finished installing, so break inner loop.
+                            break
+                        }
+                    }
+                    
+                    break
+                }
+                
+                let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
+                if !didInstallSuccessfully
+                {
+                    // App version does not match the version we attempted to install, so assume error occured.
+                    throw CancellationError()
+                }
+                
+                // App version matches version we're installing, so break loop.
+                break
+            }
+            else
+            {
+                let isVersionInstalled = try await self.isAppVersionInstalled(appVersion, for: storeApp)
+                guard isVersionInstalled else {
+                    // App is either not installed, or installed version doesn't match the version we're installing,
+                    // Either way, keep polling.
+                    
+                    try await Task.sleep(for: .milliseconds(50))
+                    continue
+                }
+                
                 if !didAddChildProgress
                 {
                     // Make sure we set manually set progress as completed.
@@ -397,43 +484,6 @@ private extension AppMarketplace
                 // App is installed, break loop.
                 break
             }
-            else if let installation
-            {
-                if !didAddChildProgress
-                {
-                    InstallTaskContext.progress.addChild(installation.progress, withPendingUnitCount: InstallTaskContext.progress.totalUnitCount)
-                    didAddChildProgress = true
-                }
-                
-                if installation.progress.fractionCompleted == 1.0
-                {
-                    // App is installed, break loop.
-                    break
-                }
-                
-                var observation: NSKeyValueObservation?
-                
-                await withCheckedContinuation { continuation in
-                    observation = installation.progress.observe(\.fractionCompleted, options: [.initial, .new]) { progress, change in
-                        Logger.sideload.info("Installation Progress for \(bundleID, privacy: .public): \(progress.fractionCompleted)")
-                        
-                        if progress.fractionCompleted == 1.0
-                        {
-                            continuation.resume()
-                        }
-                    }
-                    
-                    installation.progress.cancellationHandler = {
-                        Logger.sideload.info("Cancelled installation for \(bundleID, privacy: .public)!")
-                        //TODO: Is this safe?
-                        continuation.resume()
-                    }
-                }
-                
-                observation?.invalidate()
-            }
-            
-            try await Task.sleep(for: .milliseconds(50))
         }
         
         let backgroundContext = DatabaseManager.shared.persistentContainer.newBackgroundContext()
@@ -464,6 +514,48 @@ private extension AppMarketplace
         }
         
         return AsyncManaged(wrappedValue: installedApp)
+    }
+    
+    func isAppVersionInstalled(@AsyncManaged _ appVersion: AltStoreCore.AppVersion, @AsyncManaged for storeApp: StoreApp) async throws -> Bool
+    {
+        guard let marketplaceID = await $storeApp.marketplaceID else {
+            throw await OperationError.unknownMarketplaceID(appName: $storeApp.name)
+        }
+        
+        // First, check that the app is installed in the first place.
+        let isInstalled = await AppLibrary.current.installedApps.contains(where: { $0.id == marketplaceID })
+        guard isInstalled else { return false }
+        
+        let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
+        let bundleID = await $storeApp.bundleIdentifier
+        
+        if let installedMetadata = await localApp.installedMetadata
+        {
+            // Verify installed metadata matches expected version.
+
+            let (version, buildVersion, localizedVersion) = await $appVersion.perform { ($0.version, $0.buildVersion, $0.localizedVersion) }
+            
+            if version == installedMetadata.shortVersion && buildVersion == installedMetadata.version
+            {
+                // Installed version matches storeApp version.
+                return true
+            }
+            else
+            {
+                // Installed version does NOT match the version we're installing.
+                Logger.sideload.info("App \(bundleID, privacy: .public) is installed, but does not match the version we're expecting. Expected: \(localizedVersion). Actual: \(installedMetadata.shortVersion) (\(installedMetadata.version))")
+                return false
+            }
+        }
+        else
+        {
+            // App is installed, but has no installedMetadata...
+            // This is most likely a bug, but we still have to handle it.
+            // Assume this only happens during initial install.
+            
+            Logger.sideload.error("App \(bundleID, privacy: .public) is installed, but installedMetadata is nil. Assuming this is a new installation (or that the update completes successfully).")
+            return true
+        }
     }
 }
 

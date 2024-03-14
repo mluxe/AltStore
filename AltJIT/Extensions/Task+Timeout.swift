@@ -10,6 +10,7 @@
 
 import Foundation
 
+@available(iOS 15, *)
 struct TimedOutError: LocalizedError
 {
     var duration: TimeInterval
@@ -30,6 +31,7 @@ struct TimedOutError: LocalizedError
 /// - Returns: Returns the result of `operation` if it completed in time.
 /// - Throws: Throws ``TimedOutError`` if the timeout expires before `operation` completes.
 ///   If `operation` throws an error before the timeout expires, that error is propagated to the caller.
+@available(iOS 16, *)
 func withTimeout<R>(seconds: TimeInterval, file: StaticString = #file, line: Int = #line, operation: @escaping @Sendable () async throws -> R) async throws -> R
 {
     return try await withThrowingTaskGroup(of: R.self) { group in
