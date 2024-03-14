@@ -7,5 +7,9 @@
 		<key>EXExtensionPointIdentifier</key>
 		<string>com.apple.marketplace.extension</string>
 	</dict>
+	<key>ALTAppGroups</key>
+	<array>
+		<string>group.io.altstore.AltStore</string>
+	</array>
 </dict>
 </plist>
