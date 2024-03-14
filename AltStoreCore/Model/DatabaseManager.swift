@@ -298,6 +298,19 @@ private extension DatabaseManager
             // Make sure to always update source URL to be current.
             try! altStoreSource.setSourceURL(Source.altStoreSourceURL)
             
+            #if MARKETPLACE
+            
+            let storeBuildVersion = localApp.buildVersion
+            
+            #else
+            
+            //TODO: Support build versions.
+            // For backwards compatibility reasons, we cannot use localApp's buildVersion as storeBuildVersion,
+            // or else the latest update will _always_ be considered new because we don't use buildVersions in our source (yet).
+            let storeBuildVersion: String? = nil
+            
+            #endif
+            
             let storeApp: StoreApp
             
             if let app = StoreApp.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(StoreApp.bundleIdentifier), StoreApp.altstoreAppID), in: context)
@@ -306,7 +319,7 @@ private extension DatabaseManager
             }
             else
             {
-                storeApp = StoreApp.makeAltStoreApp(version: localApp.version, buildVersion: nil, in: context)
+                storeApp = StoreApp.makeAltStoreApp(version: localApp.version, buildVersion: storeBuildVersion, in: context)
                 storeApp.source = altStoreSource
             }
                         
@@ -319,10 +332,7 @@ private extension DatabaseManager
             }
             else
             {
-                //TODO: Support build versions.
-                // For backwards compatibility reasons, we cannot use localApp's buildVersion as storeBuildVersion,
-                // or else the latest update will _always_ be considered new because we don't use buildVersions in our source (yet).
-                installedApp = InstalledApp(resignedApp: localApp, originalBundleIdentifier: StoreApp.altstoreAppID, certificateSerialNumber: serialNumber, storeBuildVersion: nil, context: context)
+                installedApp = InstalledApp(resignedApp: localApp, originalBundleIdentifier: StoreApp.altstoreAppID, certificateSerialNumber: serialNumber, storeBuildVersion: storeBuildVersion, context: context)
                 installedApp.storeApp = storeApp
             }
             
@@ -402,7 +412,7 @@ private extension DatabaseManager
             let cachedExpirationDate = installedApp.expirationDate
                         
             // Must go after comparing versions to see if we need to update our cached AltStore app bundle.
-            installedApp.update(resignedApp: localApp, certificateSerialNumber: serialNumber, storeBuildVersion: nil)
+            installedApp.update(resignedApp: localApp, certificateSerialNumber: serialNumber, storeBuildVersion: storeBuildVersion)
             
             if installedApp.refreshedDate < cachedRefreshedDate
             {
