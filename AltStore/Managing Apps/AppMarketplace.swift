@@ -394,9 +394,12 @@ private extension AppMarketplace
             if let installation
             {
                 // App is currently being installed.
+                Logger.sideload.info("App \(bundleID, privacy: .public) has valid installation metadata!")
                 
                 if !didAddChildProgress
                 {
+                    Logger.sideload.info("Added child progress for app \(bundleID, privacy: .public)")
+                    
                     InstallTaskContext.progress.addChild(installation.progress, withPendingUnitCount: InstallTaskContext.progress.totalUnitCount)
                     didAddChildProgress = true
                 }
@@ -405,18 +408,30 @@ private extension AppMarketplace
                 {
                     // Progress has not yet completed, so add it as child and wait for it to complete.
                     
+                    Logger.sideload.info("Installation progress is less than 1.0, polling until finished...")
+                    
                     while true
                     {
                         if installation.progress.isCancelled
                         {
                             // Installation was cancelled, so assume error occured.
+                            Logger.sideload.info("Installation cancelled! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                             throw CancellationError()
                         }
                         
                         if installation.progress.fractionCompleted == 1.0
                         {
+                            Logger.sideload.info("Installation finished with progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                             break
                         }
+                        
+                        if installation.progress.fractionCompleted < 0 || installation.progress.completedUnitCount < 0
+                        {
+                            Logger.sideload.fault("Installation progress returned invalid value! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
+                            break
+                        }
+                        
+                        Logger.sideload.info("Installation progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                         
                         // I hate that this is the best way to _reliably_ know when app finished installing...but it is.
                         try await Task.sleep(for: .seconds(0.5))
@@ -432,10 +447,14 @@ private extension AppMarketplace
                 // }
                 
                 // App version matches version we're installing, so break loop.
+                Logger.sideload.info("Finished installing marketplace app \(bundleID, privacy: .public)")
+                
                 break
             }
             else
             {
+                Logger.sideload.info("App \(bundleID, privacy: .public) is missing installation metadata, falling back to manual check.")
+                
                 let isVersionInstalled = try await self.isAppVersionInstalled(appVersion, for: storeApp)
                 guard isVersionInstalled else {
                     // App is either not installed, or installed version doesn't match the version we're installing,
@@ -448,10 +467,12 @@ private extension AppMarketplace
                 if !didAddChildProgress
                 {
                     // Make sure we set manually set progress as completed.
+                    Logger.sideload.info("Manually updated progress for app \(bundleID, privacy: .public) to \(InstallTaskContext.progress.fractionCompleted) (\(InstallTaskContext.progress.completedUnitCount) of \(InstallTaskContext.progress.totalUnitCount))")
                     InstallTaskContext.progress.completedUnitCount = InstallTaskContext.progress.totalUnitCount
                 }
                 
                 // App is installed, break loop.
+                Logger.sideload.info("(Apparently) finished installing marketplace app \(bundleID, privacy: .public) (with manual check)")
                 break
             }
         }
