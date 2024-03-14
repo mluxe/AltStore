@@ -16,7 +16,7 @@ extension UIViewController
     {
         #if MARKETPLACE
 
-        let marketplaceAppViewController = InstallMarketplaceAppViewController(action: .open(installedApp))
+        let marketplaceAppViewController = InstallMarketplaceAppViewController(action: .open(installedApp), isRedownload: false)
         
         let navigationController = UINavigationController(rootViewController: marketplaceAppViewController)
         self.present(navigationController, animated: true)

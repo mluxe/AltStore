@@ -44,6 +44,7 @@ private extension AppMarketplace
     struct InstallVerificationTokenRequest: Encodable
     {
         var bundleID: String
+        var redownload: Bool
     }
 
     struct InstallVerificationTokenResponse: Decodable
@@ -315,20 +316,19 @@ private extension AppMarketplace
         }
         storeApp = _app
         
-        //TODO: Latest available, or latest supported?
         guard let marketplaceID = await $storeApp.marketplaceID else {
             throw await OperationError.unknownMarketplaceID(appName: $storeApp.name)
         }
         
-        let bundleID = await $storeApp.bundleIdentifier
-        InstallTaskContext.beginInstallationHandler?(bundleID) // TODO: Is this called too early?
-        
-        let installVerificationToken = try await self.requestInstallToken(bundleID: bundleID)
+        // Can't rely on localApp.isInstalled to be accurate... FB://feedback-placeholder
+        // let isInstalled = await localApp.isInstalled
+        // let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
         
         // Save app info to keychain so MarketplaceExtension can read it.
         try await $appVersion.perform {
             try Keychain.shared.setPendingInstall(for: $0, installVerificationToken: installVerificationToken)
         }
+        let isInstalled = await AppLibrary.current.installedApps.contains(where: { $0.id == marketplaceID })
         
         defer {
             do
@@ -341,27 +341,32 @@ private extension AppMarketplace
                 Logger.main.error("Failed to remove pending installation for app \(bundleID). \(error.localizedDescription, privacy: .public)")
             }
         }
+        let bundleID = await $storeApp.bundleIdentifier
+        InstallTaskContext.beginInstallationHandler?(bundleID) // TODO: Is this called too early?
                 
-        let installMarketplaceAppViewController = await MainActor.run { () -> InstallMarketplaceAppViewController? in
+        let installMarketplaceAppViewController = await MainActor.run { [operation] () -> InstallMarketplaceAppViewController? in
             
             var action: AppBannerView.AppAction?
+            var isRedownload: Bool = false
             
             switch operation
             {
             case .install(let app):
                 guard let storeApp = app.storeApp else { break }
                 action = .install(storeApp)
+                isRedownload = isInstalled // "redownload" if app is already installed
                 
             case .update(let app):
                 guard let installedApp = app as? InstalledApp ?? app.storeApp?.installedApp else { break }
                 action = .update(installedApp)
+                isRedownload = false // Updates are never redownloads
                 
             default: break
             }
             
             guard let action else { return nil }
             
-            let installMarketplaceAppViewController = InstallMarketplaceAppViewController(action: action)
+            let installMarketplaceAppViewController = InstallMarketplaceAppViewController(action: action, isRedownload: isRedownload)
             return installMarketplaceAppViewController
         }
         
@@ -480,11 +485,11 @@ private extension AppMarketplace
 @available(iOS 17.4, *)
 extension AppMarketplace
 {
-    func requestInstallToken(bundleID: String) async throws -> String
+    func requestInstallToken(bundleID: String, isRedownload: Bool) async throws -> String
     {
         let requestURL = URL(string: "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com/install-token")!
         
-        let payload = InstallVerificationTokenRequest(bundleID: bundleID)
+        let payload = InstallVerificationTokenRequest(bundleID: bundleID, redownload: isRedownload)
         let bodyData = try JSONEncoder().encode(payload)
         
         var request = URLRequest(url: requestURL)

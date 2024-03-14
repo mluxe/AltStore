@@ -50,6 +50,7 @@ extension InstallMarketplaceAppViewController
 class InstallMarketplaceAppViewController: UICollectionViewController
 {
     let buttonAction: AppBannerView.AppAction!
+    let isRedownload: Bool
     
     var completionHandler: ((Result<Void, Error>) -> Void)?
     
@@ -58,9 +59,10 @@ class InstallMarketplaceAppViewController: UICollectionViewController
     
     private lazy var dataSource = self.makeDataSource()
     
-    init(action: AppBannerView.AppAction)
+    init(action: AppBannerView.AppAction, isRedownload: Bool)
     {
         self.buttonAction = action
+        self.isRedownload = isRedownload
         
         let layout = Self.makeLayout()
         super.init(collectionViewLayout: layout)
@@ -139,7 +141,7 @@ class InstallMarketplaceAppViewController: UICollectionViewController
             appName = storeApp.name
             
             //TODO: Do accounts matter?
-            let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: false),
+            let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: self.isRedownload),
                                               confirmInstall: {
                 do
                 {
@@ -148,7 +150,7 @@ class InstallMarketplaceAppViewController: UICollectionViewController
                         self.completionHandler?(.success(()))
                     }
                     
-                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID)
+                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID, isRedownload: self.isRedownload)
                     return .confirmed(installVerificationToken: installToken, authenticationContext: nil)
                 }
                 catch
@@ -177,7 +179,7 @@ class InstallMarketplaceAppViewController: UICollectionViewController
                         self.completionHandler?(.success(()))
                     }
                     
-                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID)
+                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID, isRedownload: self.isRedownload)
                     return .confirmed(installVerificationToken: installToken, authenticationContext: nil)
                 }
                 catch
