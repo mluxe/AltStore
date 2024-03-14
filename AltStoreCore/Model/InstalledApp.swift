@@ -165,6 +165,24 @@ public extension InstalledApp
         }
     }
     
+    @available(iOS 17.4, *)
+    func update(forMarketplaceAppVersion appVersion: AppVersion)
+    {
+        //TODO: Switch to receiving AppLibrary.App.Metadata once that's reliable.
+        
+        self.version = appVersion.version
+        self.buildVersion = appVersion.buildVersion ?? ""
+        self.refreshedDate = Date() // Effectively becomes "modified date"
+        
+        self.storeBuildVersion = appVersion.buildVersion
+        
+        if let storeApp = appVersion.storeApp
+        {
+            self.name = storeApp.name
+            self.storeApp = storeApp
+        }
+    }
+    
     func update(provisioningProfile: ALTProvisioningProfile)
     {
         self.refreshedDate = provisioningProfile.creationDate

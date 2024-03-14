@@ -381,25 +381,69 @@ private extension AppMarketplace
             }
         }
         
-        let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
+        var didAddChildProgress = false
         
-        if let installation = await localApp.installation
+        while true
         {
-            InstallTaskContext.progress.addChild(installation.progress, withPendingUnitCount: InstallTaskContext.progress.totalUnitCount)
+            let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
             
-            await withCheckedContinuation { continuation in
-                installation.progress.cancellationHandler = {
-                    //TODO: How do we know when progress finishes?
-                    continuation.resume()
-                }
+            let (installation, installedMetadata) = await MainActor.run {
+                (localApp.installation, localApp.installedMetadata)
             }
-        }
-        
-        //TODO: How are errors handled?
+            
+            // Can't rely on localApp.isInstalled to be accurate.
+            let isInstalled = await AppLibrary.current.installedApps.contains(where: { $0.id == marketplaceID })
+            
+            Logger.sideload.info("Installing app \(bundleID, privacy: .public)... Installed: \(isInstalled). Metadata: \(String(describing: installedMetadata), privacy: .public). Installation: \(String(describing: installation), privacy: .public)")
+                                    
+            if isInstalled
+            {
+                if !didAddChildProgress
+                {
+                    // Make sure we set manually set progress as completed.
+                    InstallTaskContext.progress.completedUnitCount = InstallTaskContext.progress.totalUnitCount
+                }
                 
-        guard let installedMetadata = await localApp.installedMetadata else {
-            let failureReason = await String(format: NSLocalizedString("The installed metadata for %@ could not be determined.", comment: ""), $storeApp.name)
-            throw OperationError.unknown(failureReason: failureReason) //TODO: Make proper error case
+                // App is installed, break loop.
+                break
+            }
+            else if let installation
+            {
+                if !didAddChildProgress
+                {
+                    InstallTaskContext.progress.addChild(installation.progress, withPendingUnitCount: InstallTaskContext.progress.totalUnitCount)
+                    didAddChildProgress = true
+                }
+                
+                if installation.progress.fractionCompleted == 1.0
+                {
+                    // App is installed, break loop.
+                    break
+                }
+                
+                var observation: NSKeyValueObservation?
+                
+                await withCheckedContinuation { continuation in
+                    observation = installation.progress.observe(\.fractionCompleted, options: [.initial, .new]) { progress, change in
+                        Logger.sideload.info("Installation Progress for \(bundleID, privacy: .public): \(progress.fractionCompleted)")
+                        
+                        if progress.fractionCompleted == 1.0
+                        {
+                            continuation.resume()
+                        }
+                    }
+                    
+                    installation.progress.cancellationHandler = {
+                        Logger.sideload.info("Cancelled installation for \(bundleID, privacy: .public)!")
+                        //TODO: Is this safe?
+                        continuation.resume()
+                    }
+                }
+                
+                observation?.invalidate()
+            }
+            
+            try await Task.sleep(for: .milliseconds(50))
         }
         
         let backgroundContext = DatabaseManager.shared.persistentContainer.newBackgroundContext()
@@ -422,7 +466,7 @@ private extension AppMarketplace
                 installedApp = InstalledApp(marketplaceApp: storeApp, context: backgroundContext)
             }
             
-            installedApp.update(for: installedMetadata, appVersion: appVersion)
+            installedApp.update(forMarketplaceAppVersion: appVersion)
             
             //TODO: Include app extensions?
             
@@ -438,7 +482,7 @@ extension AppMarketplace
 {
     func requestInstallToken(bundleID: String) async throws -> String
     {
-        let requestURL = URL(string: "https://api.altstore.io/install-token")!
+        let requestURL = URL(string: "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com/install-token")!
         
         let payload = InstallVerificationTokenRequest(bundleID: bundleID)
         let bodyData = try JSONEncoder().encode(payload)

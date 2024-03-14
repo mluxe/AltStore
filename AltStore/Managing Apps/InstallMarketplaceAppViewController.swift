@@ -144,6 +144,7 @@ class InstallMarketplaceAppViewController: UICollectionViewController
                 do
                 {
                     DispatchQueue.main.async {
+                        self.dismiss(animated: true)
                         self.completionHandler?(.success(()))
                     }
                     
@@ -172,6 +173,7 @@ class InstallMarketplaceAppViewController: UICollectionViewController
                 do
                 {
                     DispatchQueue.main.async {
+                        self.dismiss(animated: true)
                         self.completionHandler?(.success(()))
                     }
                     
