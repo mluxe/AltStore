@@ -348,6 +348,9 @@ private extension MyAppsViewController
             cell.bannerView.button.removeTarget(self, action: nil, for: .primaryActionTriggered)
             cell.bannerView.button.addTarget(self, action: #selector(MyAppsViewController.openApp(_:)), for: .primaryActionTriggered)
             
+            // Hide Open button for AltStore.
+            cell.bannerView.button.isHidden = (installedApp.bundleIdentifier == StoreApp.altstoreAppID)
+            
             #else
             
             let currentDate = Date()
