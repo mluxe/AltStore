@@ -410,6 +410,8 @@ private extension AppMarketplace
                     
                     Logger.sideload.info("Installation progress is less than 1.0, polling until finished...")
                     
+                    var fractionComplete: Double?
+                    
                     while true
                     {
                         if installation.progress.isCancelled
@@ -425,11 +427,17 @@ private extension AppMarketplace
                             break
                         }
                         
-                        if installation.progress.fractionCompleted < 0 || installation.progress.completedUnitCount < 0
+                        if let fractionComplete, installation.progress.fractionCompleted != fractionComplete
                         {
-                            Logger.sideload.fault("Installation progress returned invalid value! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
-                            break
+                            // If fractionComplete has changed at least once but the value is negative, consider it complete.
+                            if installation.progress.fractionCompleted < 0 || installation.progress.completedUnitCount < 0
+                            {
+                                Logger.sideload.fault("Installation progress returned invalid value! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
+                                break
+                            }
                         }
+                        
+                        fractionComplete = installation.progress.fractionCompleted
                         
                         Logger.sideload.info("Installation progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                         
