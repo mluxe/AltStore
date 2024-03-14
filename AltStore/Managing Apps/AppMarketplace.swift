@@ -324,23 +324,8 @@ private extension AppMarketplace
         // let isInstalled = await localApp.isInstalled
         // let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
         
-        // Save app info to keychain so MarketplaceExtension can read it.
-        try await $appVersion.perform {
-            try Keychain.shared.setPendingInstall(for: $0, installVerificationToken: installVerificationToken)
-        }
         let isInstalled = await AppLibrary.current.installedApps.contains(where: { $0.id == marketplaceID })
         
-        defer {
-            do
-            {
-                // Remove pending installation info from Keychain.
-                try Keychain.shared.removePendingInstall(for: marketplaceID)
-            }
-            catch
-            {
-                Logger.main.error("Failed to remove pending installation for app \(bundleID). \(error.localizedDescription, privacy: .public)")
-            }
-        }
         let bundleID = await $storeApp.bundleIdentifier
         InstallTaskContext.beginInstallationHandler?(bundleID) // TODO: Is this called too early?
                 
