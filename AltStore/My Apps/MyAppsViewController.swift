@@ -1839,6 +1839,20 @@ extension MyAppsViewController
             self.changeIcon(for: installedApp, to: nil)
         }
         
+        #if MARKETPLACE
+        
+        if installedApp.bundleIdentifier == StoreApp.altstoreAppID
+        {
+            actions = []
+        }
+        else
+        {
+            // Require users to manually remove apps until AppLibrary bugs are fixed.
+            actions = [removeAction]
+        }
+        
+        #else
+        
         var changeIconActions = [chooseIconAction]
         if installedApp.hasAlternateIcon
         {
@@ -1979,18 +1993,14 @@ extension MyAppsViewController
             }
         }
         
+        #endif
+        
         let menu = UIMenu(title: title ?? "", children: actions)
         return menu
     }
     
     override func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration?
     {
-        #if MARKETPLACE
-        
-        return nil
-        
-        #else
-        
         let section = Section(rawValue: indexPath.section)!
         switch section
         {
@@ -2003,8 +2013,6 @@ extension MyAppsViewController
                 return menu
             }
         }
-        
-        #endif
     }
     
     override func collectionView(_ collectionView: UICollectionView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview?

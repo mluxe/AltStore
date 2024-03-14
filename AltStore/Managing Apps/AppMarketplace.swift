@@ -70,54 +70,55 @@ extension AppMarketplace
 {
     func update() async
     {
-        if !self.didUpdateInstalledApps
-        {
-            // Wait until the first observed change before we trust the returned value.
-            await withCheckedContinuation { continuation in
-                Task<Void, Never> { @MainActor in
-                    _ = withObservationTracking {
-                        AppLibrary.current.installedApps
-                    } onChange: {
-                        Task {
-                            continuation.resume()
-                        }
-                    }
-                }
-            }
-            
-            self.didUpdateInstalledApps = true
-        }
-        
-        let installedMarketplaceIDs = await Set(AppLibrary.current.installedApps.map(\.id))
-        
-        do
-        {
-            let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
-            try await context.performAsync {
-
-                let installedApps = InstalledApp.all(in: context)
-                for installedApp in installedApps where installedApp.bundleIdentifier != StoreApp.altstoreAppID
-                {
-                    // Ignore any installed apps without valid marketplace StoreApp.
-                    guard let storeApp = installedApp.storeApp, let marketplaceID = storeApp.marketplaceID else { continue }
-
-                    // Ignore any apps we are actively installing.
-                    guard !AppManager.shared.isActivelyManagingApp(withBundleID: installedApp.bundleIdentifier) else { continue }
-
-                    if !installedMarketplaceIDs.contains(marketplaceID)
-                    {
-                        // This app is no longer installed, so delete.
-                        context.delete(installedApp)
-                    }
-                }
-
-                try context.save()
-            }
-        }
-        catch
-        {
-            Logger.main.error("Failed to update installed apps. \(error.localizedDescription, privacy: .public)")
-        }
+        //FIXME: Uncomment once AppLibrary can reliably tell us whether app is installed or not.
+//        if !self.didUpdateInstalledApps
+//        {
+//            // Wait until the first observed change before we trust the returned value.
+//            await withCheckedContinuation { continuation in
+//                Task<Void, Never> { @MainActor in
+//                    _ = withObservationTracking {
+//                        AppLibrary.current.installedApps
+//                    } onChange: {
+//                        Task {
+//                            continuation.resume()
+//                        }
+//                    }
+//                }
+//            }
+//            
+//            self.didUpdateInstalledApps = true
+//        }
+//        
+//        let installedMarketplaceIDs = await Set(AppLibrary.current.installedApps.map(\.id))
+//        
+//        do
+//        {
+//            let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+//            try await context.performAsync {
+//
+//                let installedApps = InstalledApp.all(in: context)
+//                for installedApp in installedApps where installedApp.bundleIdentifier != StoreApp.altstoreAppID
+//                {
+//                    // Ignore any installed apps without valid marketplace StoreApp.
+//                    guard let storeApp = installedApp.storeApp, let marketplaceID = storeApp.marketplaceID else { continue }
+//
+//                    // Ignore any apps we are actively installing.
+//                    guard !AppManager.shared.isActivelyManagingApp(withBundleID: installedApp.bundleIdentifier) else { continue }
+//
+//                    if !installedMarketplaceIDs.contains(marketplaceID)
+//                    {
+//                        // This app is no longer installed, so delete.
+//                        context.delete(installedApp)
+//                    }
+//                }
+//
+//                try context.save()
+//            }
+//        }
+//        catch
+//        {
+//            Logger.main.error("Failed to update installed apps. \(error.localizedDescription, privacy: .public)")
+//        }
     }
     
     func install(@AsyncManaged _ storeApp: StoreApp, presentingViewController: UIViewController?, beginInstallationHandler: ((String) -> Void)?) async -> (Task<AsyncManaged<InstalledApp>, Error>, Progress)
