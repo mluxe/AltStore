@@ -328,7 +328,8 @@ private extension AppMarketplace
         // let isInstalled = await localApp.isInstalled
         // let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
         
-        let isInstalled = await AppLibrary.current.installedApps.contains(where: { $0.id == marketplaceID })
+        let installedApps = await AppLibrary.current.installedApps
+        let isInstalled = installedApps.contains(where: { $0.id == marketplaceID })
         
         let bundleID = await $storeApp.bundleIdentifier
         InstallTaskContext.beginInstallationHandler?(bundleID) // TODO: Is this called too early?
@@ -406,64 +407,29 @@ private extension AppMarketplace
                     
                     while true
                     {
-                        do
+                        if installation.progress.isCancelled
                         {
-                            try await withTimeout(seconds: 5.0) {
-                                var observation: NSKeyValueObservation?
-                                
-                                defer {
-                                    observation?.invalidate()
-                                }
-                                
-                                // Yes, we need to observe both fractionCompleted AND cancellationHandler to know if installation completes.
-                                await withCheckedContinuation { continuation in
-                                    observation = installation.progress.observe(\.fractionCompleted, options: [.initial, .new]) { progress, change in
-                                        Logger.sideload.info("Installation Progress for \(bundleID, privacy: .public): \(progress.fractionCompleted)")
-                                        
-                                        if progress.fractionCompleted == 1.0
-                                        {
-                                            continuation.resume()
-                                        }
-                                    }
-                                    
-                                    installation.progress.cancellationHandler = {
-                                        Logger.sideload.info("Cancelled installation for \(bundleID, privacy: .public)!")
-                                        //TODO: Is this safe?
-                                        continuation.resume()
-                                    }
-                                }
-                            }
-                            
+                            // Installation was cancelled, so assume error occured.
+                            throw CancellationError()
+                        }
+                        
+                        if installation.progress.fractionCompleted == 1.0
+                        {
                             break
                         }
-                        catch let error as TimedOutError
-                        {
-                            Logger.sideload.error("Installation (potentially) timed-out after \(error.duration) seconds.")
-                            
-                            // Manually check whether app finished installing or not.
-                            // If app.installation is nil, we can assume that is has.
-                            
-                            let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
-                            if await localApp.installation != nil
-                            {
-                                // App is still installing, so perform inner loop again.
-                                continue
-                            }
-                            
-                            // App is finished installing, so break inner loop.
-                            break
-                        }
+                        
+                        // I hate that this is the best way to _reliably_ know when app finished installing...but it is.
+                        try await Task.sleep(for: .seconds(0.5))
                     }
-                    
-                    break
                 }
                 
-                let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
-                if !didInstallSuccessfully
-                {
-                    // App version does not match the version we attempted to install, so assume error occured.
-                    throw CancellationError()
-                }
+                //FIXME: Uncomment this when AppLibrary bugs are fixed.
+                // let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
+                // if !didInstallSuccessfully
+                // {
+                //     // App version does not match the version we attempted to install, so assume error occured.
+                //     throw CancellationError()
+                // }
                 
                 // App version matches version we're installing, so break loop.
                 break
