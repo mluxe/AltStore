@@ -17,14 +17,24 @@ final class AltMarketplace: MarketplaceExtension
 {
     required init()
     {
-        // Initialize your extension here.
+        // Hacky, but reliable.
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        DatabaseManager.shared.start { error in
+            semaphore.signal()
+            
+            if let error
+            {
+                fatalError("Failed to load database: \(error.localizedDescription)")
+            }
+        }
+        
+        _ = semaphore.wait(timeout: .now())
     }
     
     func additionalHeaders(for request: URLRequest, account: String) -> [String : String]?
     {
-        //TODO: Does iOS automatically provide the OAuth Bearer token? Or do we need to provide it ourselves?
-        
-        let bundleVersion = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as? String ?? ""
+        let bundleVersion = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as? String ?? "1"
         var additionalHeaders = ["ALT_PAL_VER": bundleVersion]
         
         guard let requestURL = request.url, requestURL.path().contains("restore") || requestURL.path().contains("update") else { return additionalHeaders }
@@ -33,51 +43,38 @@ final class AltMarketplace: MarketplaceExtension
         {
             guard let data = request.httpBody else { throw URLError(URLError.Code.unsupportedURL) }
             
-            switch requestURL.path()
+            let payload = try Foundation.JSONDecoder().decode(InstallAppRequest.self, from: data)
+            
+            for app in payload.apps
             {
-            case let path where path.lowercased().contains("restore"):
-                // Installing app
+                guard let marketplaceID = AppleItemID(app.appleItemId) else { continue }
+                        
+                let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
                 
-                let payload = try Foundation.JSONDecoder().decode(InstallAppRequest.self, from: data)
-                
-                for app in payload.apps
-                {
-                    // Provide download URL + install in headers.
-                    guard let marketplaceID = AppleItemID(app.appleItemId), let pendingInstall = try Keychain.shared.pendingInstall(for: marketplaceID) else { continue }
+                let values = context.performAndWait { () -> (bundleID: String, adpURL: URL, version: String, buildVersion: String)? in
+                    //TODO: Somehow determine which source to use if there are multiple.
+                    let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp._marketplaceID), marketplaceID.description)
+                    guard let storeApp = StoreApp.first(satisfying: predicate, in: context) else { return nil }
                     
-                    let adpHeader = HTTPHeader.adpURL(for: marketplaceID)
-                    let installTokenHeader = HTTPHeader.installVerificationToken(for: marketplaceID) //TODO: Do we need to provide install token? Or does server re-generate it?
+                    let installedAppVersion = storeApp.installedApp?.version ?? storeApp.latestSupportedVersion?.version
                     
-                    additionalHeaders[adpHeader.rawValue] = pendingInstall.adpURL.absoluteString
-                    additionalHeaders[installTokenHeader.rawValue] = pendingInstall.installVerificationToken
+                    // Return values
+                    guard let appVersion = storeApp.versions.first(where: { $0.version == installedAppVersion }), let buildVersion = appVersion.buildVersion else { return nil }
+                    return (storeApp.bundleIdentifier, appVersion.downloadURL, appVersion.version, buildVersion)
                 }
                 
-                break
-                
-            case let path where path.lowercased().contains("update"):
-                // Updating app
-                
-                let payload = try Foundation.JSONDecoder().decode(InstallAppRequest.self, from: data)
-                
-                for app in payload.apps
+                if let values
                 {
-                    // Provide app info in headers.
-                    guard let marketplaceID = AppleItemID(app.appleItemId), let pendingInstall = try Keychain.shared.pendingInstall(for: marketplaceID) else { continue }
-                    
+                    let bundleID = HTTPHeader.bundleID(for: marketplaceID)
                     let adpHeader = HTTPHeader.adpURL(for: marketplaceID)
                     let versionHeader = HTTPHeader.version(for: marketplaceID)
                     let buildVersionHeader = HTTPHeader.buildVersion(for: marketplaceID)
-                    let installTokenHeader = HTTPHeader.installVerificationToken(for: marketplaceID) //TODO: Do we need to provide install token? Or does server re-generate it?
                     
-                    additionalHeaders[adpHeader.rawValue] = pendingInstall.adpURL.absoluteString
-                    additionalHeaders[versionHeader.rawValue] = pendingInstall.version
-                    additionalHeaders[buildVersionHeader.rawValue] = pendingInstall.buildVersion
-                    additionalHeaders[installTokenHeader.rawValue] = pendingInstall.installVerificationToken
+                    additionalHeaders[bundleID.rawValue] = values.bundleID
+                    additionalHeaders[adpHeader.rawValue] = values.adpURL.absoluteString
+                    additionalHeaders[versionHeader.rawValue] = values.version
+                    additionalHeaders[buildVersionHeader.rawValue] = values.buildVersion
                 }
-                
-                break
-                
-            default: break
             }
         }
         catch

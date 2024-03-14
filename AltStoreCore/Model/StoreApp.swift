@@ -103,7 +103,7 @@ public class StoreApp: NSManagedObject, Decodable, Fetchable
         guard let rawValue = self._marketplaceID else { return nil }
         return UInt64(rawValue)
     }
-    @NSManaged @objc(marketplaceID) private var _marketplaceID: String? // Ugh, we used String in 2.0rc and now we're stuck with it.
+    @NSManaged @objc(marketplaceID) public private(set) var _marketplaceID: String? // Ugh, we used String in 2.0rc and now we're stuck with it.
     
     @NSManaged public var isPledged: Bool
     @NSManaged public private(set) var isPledgeRequired: Bool

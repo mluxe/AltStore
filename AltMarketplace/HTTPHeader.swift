@@ -34,9 +34,9 @@ struct HTTPHeader: RawRepresentable
         return header
     }
     
-    static func installVerificationToken(for appleItemID: AppleItemID) -> HTTPHeader
+    static func bundleID(for appleItemID: AppleItemID) -> HTTPHeader
     {
-        let header = HTTPHeader(rawValue: "alt-install-token-" + String(appleItemID))
+        let header = HTTPHeader(rawValue: "alt-bundleID-" + String(appleItemID))
         return header
     }
 }

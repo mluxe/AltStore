@@ -9,7 +9,7 @@
 import Foundation
 import MarketplaceKit
 
-public struct InstallAppRequest: Decodable
+public struct InstallAppRequest: Codable
 {
     public struct App: Codable
     {
