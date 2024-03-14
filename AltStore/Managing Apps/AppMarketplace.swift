@@ -247,7 +247,7 @@ private extension AppMarketplace
             
             let title = NSLocalizedString("Unsupported iOS Version", comment: "")
             let message = error.localizedDescription + "\n\n" + NSLocalizedString("Would you like to download the last version compatible with this device instead?", comment: "")
-            let localizedVersion = latestSupportedVersion.localizedVersion
+            let localizedVersion = await $storeApp.perform { _ in latestSupportedVersion.localizedVersion }
             
             let action = await UIAlertAction(title: String(format: NSLocalizedString("Download %@ %@", comment: ""), $storeApp.name, localizedVersion), style: .default)
             try await presentingViewController.presentConfirmationAlert(title: title, message: message, primaryAction: action)
