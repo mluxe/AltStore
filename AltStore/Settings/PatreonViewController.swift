@@ -124,6 +124,19 @@ private extension PatreonViewController
         Riley & Shane
         """, comment: "")
         
+        #if MARKETPLACE
+        
+        let isPatronText = NSLocalizedString("""
+        Hey ,
+        
+        You’re the best. Your account was linked successfully, so you now have access to our Patreon-exclusive apps. You can find them all in the Browse tab.
+        
+        Thanks for all of your support. Enjoy!
+        Riley & Shane
+        """, comment: "")
+        
+        #else
+        
         let isPatronText = NSLocalizedString("""
         Hey ,
         
@@ -132,6 +145,8 @@ private extension PatreonViewController
         Thanks for all of your support. Enjoy!
         Riley & Shane
         """, comment: "")
+        
+        #endif
         
         if let account = DatabaseManager.shared.patreonAccount(), PatreonAPI.shared.isAuthenticated
         {
