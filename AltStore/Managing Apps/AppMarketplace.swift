@@ -439,6 +439,18 @@ private extension AppMarketplace
                         
                         fractionComplete = installation.progress.fractionCompleted
                         
+                        if installation.progress.fractionCompleted < 0 || installation.progress.completedUnitCount < 0
+                        {
+                            // One last sanity check: if progress is negative, check if AppLibrary _does_ report correct value.
+                            // If it does, we can exit early.
+                            
+                            let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
+                            if didInstallSuccessfully
+                            {
+                                break
+                            }
+                        }
+                        
                         Logger.sideload.info("Installation progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                         
                         // I hate that this is the best way to _reliably_ know when app finished installing...but it is.
