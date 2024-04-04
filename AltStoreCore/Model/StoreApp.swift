@@ -14,6 +14,8 @@ import AltSign
 
 public extension StoreApp
 {
+    static let altstoreMarketplaceID: UInt64 = 6478868316
+    
     #if MARKETPLACE
     
     #if ALPHA
