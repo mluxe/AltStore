@@ -378,7 +378,8 @@ extension AppBannerView
             self.layoutIfNeeded()
         }
         
-        if let progress = AppManager.shared.installationProgress(for: app), progress.fractionCompleted < 1.0
+        // BUG: Sometimes progress may _start_ at 1.0 and never go down, so we can't use "< 1.0" in this `if` statement.
+        if let progress = AppManager.shared.installationProgress(for: app)//, progress.fractionCompleted < 1.0
         {
             self.button.progress = progress
         }
