@@ -40,12 +40,20 @@ extension ServerManager
 {
     func startDiscovering()
     {
+        #if MARKETPLACE
+        
+        // Do nothing for MARKETPLACE builds.
+        
+        #else
+        
         guard !self.isDiscovering else { return }
         self.isDiscovering = true
         
         self.serviceBrowser.searchForServices(ofType: ALTServerServiceType, inDomain: "")
         
         self.startListeningForWiredConnections()
+        
+        #endif
     }
     
     func stopDiscovering()
