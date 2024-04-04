@@ -362,11 +362,20 @@ extension AppManager
         // This is just a sanity check, so pass nil for existingSource to keep code simple.
         guard !sourceExists else { throw SourceError.duplicate(source, existingSource: nil) }
         
+        #if MARKETPLACE
+        
+        //TODO: Don't throw error once third-party sources are supported.
+        throw SourceError.unsupported(source)
+        
+        #else
+        
         try await context.performAsync {
             try context.save()
         }
         
         NotificationCenter.default.post(name: AppManager.didAddSourceNotification, object: source)
+        
+        #endif
     }
     
     func remove(@AsyncManaged _ source: Source, presentingViewController: UIViewController) async throws
