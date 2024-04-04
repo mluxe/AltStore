@@ -175,7 +175,7 @@ private extension PatchAppOperation
     func downloadArchive(from update: OTAUpdate) -> AnyPublisher<URL, Error>
     {
         Just(()).tryMap {
-            #if targetEnvironment(simulator)
+            #if targetEnvironment(simulator) || MARKETPLACE
             throw PatchAppError.unsupportedOperatingSystemVersion(ProcessInfo.processInfo.operatingSystemVersion)
             #else
             
