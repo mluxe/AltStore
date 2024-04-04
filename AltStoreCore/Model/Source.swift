@@ -15,7 +15,9 @@ public extension Source
     
     #if STAGING
     
-    #if ALPHA
+    #if MARKETPLACE
+    static let altStoreSourceURL = URL(string: "https://f000.backblazeb2.com/file/altstore-staging/marketplace-staging.json")!
+    #elseif ALPHA
     static let altStoreSourceURL = URL(string: "https://f000.backblazeb2.com/file/altstore-staging/sources/alpha/apps-alpha-staging.json")!
     #else
     static let altStoreSourceURL = URL(string: "https://f000.backblazeb2.com/file/altstore-staging/apps-staging.json")!
@@ -24,7 +26,7 @@ public extension Source
     #else
     
     #if MARKETPLACE
-    static let altStoreSourceURL = URL(string: "https://marketplace.altstore.io")! //TODO: Change to human-facing version
+    static let altStoreSourceURL = URL(string: "https://marketplace.altstore.io")!
     #elseif ALPHA
     static let altStoreSourceURL = URL(string: "https://alpha.altstore.io/")!
     #else
