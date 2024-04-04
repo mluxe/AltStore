@@ -26,6 +26,7 @@ extension SettingsViewController
         case instructions
         case techyThings
         case credits
+        case support
         case macDirtyCow
         case debug
     }
@@ -48,6 +49,12 @@ extension SettingsViewController
     {
         case errorLog
         case clearCache
+    }
+    
+    fileprivate enum SupportRow: Int, CaseIterable
+    {
+        case contactUs
+        case privacyPolicy
     }
     
     fileprivate enum DebugRow: Int, CaseIterable
@@ -269,6 +276,9 @@ private extension SettingsViewController
             
         case .credits:
             settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("CREDITS", comment: "")
+            
+        case .support:
+            settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("SUPPORT", comment: "")
             
         case .macDirtyCow:
             if isHeader
@@ -574,7 +584,7 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return nil
         case .signIn where self.activeTeam != nil: return nil
         case .account where self.activeTeam == nil: return nil
-        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .macDirtyCow, .debug:
+        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .support, .macDirtyCow, .debug:
             let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "HeaderFooterView") as! SettingsHeaderFooterView
             self.prepare(headerView, for: section, isHeader: true)
             return headerView
@@ -595,7 +605,7 @@ extension SettingsViewController
             self.prepare(footerView, for: section, isHeader: false)
             return footerView
             
-        case .account, .credits, .debug, .instructions: return nil
+        case .account, .credits, .support, .debug, .instructions: return nil
         }
     }
 
@@ -607,7 +617,7 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return 1.0
         case .signIn where self.activeTeam != nil: return 1.0
         case .account where self.activeTeam == nil: return 1.0
-        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .macDirtyCow, .debug:
+        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .support, .macDirtyCow, .debug:
             let height = self.preferredHeight(for: self.prototypeHeaderFooterView, in: section, isHeader: true)
             return height
             
@@ -627,7 +637,7 @@ extension SettingsViewController
             let height = self.preferredHeight(for: self.prototypeHeaderFooterView, in: section, isHeader: false)
             return height
             
-        case .account, .credits, .debug, .instructions: return 0.0
+        case .account, .credits, .support, .debug, .instructions: return 0.0
         }
     }
 }
@@ -669,6 +679,39 @@ extension SettingsViewController
             if let selectedIndexPath = self.tableView.indexPathForSelectedRow
             {
                 self.tableView.deselectRow(at: selectedIndexPath, animated: true)
+            }
+            
+        case .support:
+            let row = SupportRow.allCases[indexPath.row]
+            switch row
+            {
+            case .contactUs:
+                if MFMailComposeViewController.canSendMail()
+                {
+                    let mailViewController = MFMailComposeViewController()
+                    mailViewController.mailComposeDelegate = self
+                    mailViewController.setToRecipients(["support@altstore.io"])
+                    
+                    if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+                    {
+                        mailViewController.setSubject("AltStore \(version) Feedback")
+                    }
+                    else
+                    {
+                        mailViewController.setSubject("AltStore Feedback")
+                    }
+                    
+                    self.present(mailViewController, animated: true, completion: nil)
+                }
+                else
+                {
+                    let toastView = ToastView(text: NSLocalizedString("Cannot Send Mail", comment: ""), detailText: nil)
+                    toastView.show(in: self)
+                }
+                
+            case .privacyPolicy:
+                let safariURL = URL(string: "https://altstore.io/privacy")!
+                UIApplication.shared.open(safariURL, options: [:])
             }
             
         case .debug:
