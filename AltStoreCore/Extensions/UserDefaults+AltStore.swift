@@ -106,7 +106,7 @@ public extension UserDefaults
         // Otherwise, default to `default` sorting (a.k.a. "source order").
         let preferredAppSorting: AppSorting = if #available(iOS 15, *) { .default } else { .name }
         
-        let defaults = [
+        var defaults = [
             #keyPath(UserDefaults.isBackgroundRefreshEnabled): true,
             #keyPath(UserDefaults.isLegacyDeactivationSupported): isLegacyDeactivationSupported,
             #keyPath(UserDefaults.activeAppLimitIncludesExtensions): activeAppLimitIncludesExtensions,
@@ -117,6 +117,10 @@ public extension UserDefaults
             #keyPath(UserDefaults.permissionCheckingDisabled): permissionCheckingDisabled,
             #keyPath(UserDefaults._preferredAppSorting): preferredAppSorting.rawValue,
         ] as [String: Any]
+        
+        #if MARKETPLACE
+        defaults[#keyPath(UserDefaults.isBackgroundRefreshEnabled)] = false
+        #endif
         
         UserDefaults.standard.register(defaults: defaults)
         UserDefaults.shared.register(defaults: defaults)
