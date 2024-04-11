@@ -59,6 +59,8 @@ extension BackgroundTaskManager
         self.audioEngineQueue.sync {
             do
             {
+                #if !MARKETPLACE
+                
                 try AVAudioSession.sharedInstance().setCategory(.playback, options: .mixWithOthers)
                 try AVAudioSession.sharedInstance().setActive(true)
                 
@@ -71,6 +73,8 @@ extension BackgroundTaskManager
                 
                 try self.audioEngine.start()
                 self.player.play()
+                
+                #endif
                 
                 self.isPlaying = true
                 
