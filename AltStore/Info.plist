@@ -92,6 +92,8 @@
 		<string>altstore-com.rileytestut.Delta.Lite.Beta</string>
 		<string>altstore-com.rileytestut.Clip</string>
 		<string>altstore-com.rileytestut.Clip.Beta</string>
+		<string>delta</string>
+		<string>clip</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

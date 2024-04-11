@@ -39,6 +39,9 @@ public extension StoreApp
     #endif
     
     static let dolphinAppID = "me.oatmealdome.dolphinios-njb"
+    
+    static let deltaAppID = "com.rileytestut.Delta"
+    static let clipAppID = "com.rileytestut.Clip"
 }
 
 private struct PatreonParameters: Decodable
@@ -532,6 +535,22 @@ public extension StoreApp
         
         let globallyUniqueID = self.bundleIdentifier + "|" + sourceIdentifier
         return globallyUniqueID
+    }
+    
+    // Will remove in the future, used to check whether app is installed while MarketplaceKit is buggy.
+    var _installedOpenURL: URL? {
+        if self.bundleIdentifier.contains(StoreApp.deltaAppID)
+        {
+            return URL(string: "delta://")
+        }
+        else if self.bundleIdentifier.contains(StoreApp.clipAppID)
+        {
+            return URL(string: "clip://")
+        }
+        else
+        {
+            return nil
+        }
     }
 }
 

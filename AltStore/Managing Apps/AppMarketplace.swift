@@ -485,12 +485,32 @@ private extension AppMarketplace
                 Logger.sideload.info("App \(bundleID, privacy: .public) is missing installation metadata, falling back to manual check.")
                 
                 let isVersionInstalled = try await self.isAppVersionInstalled(appVersion, for: storeApp)
-                guard isVersionInstalled else {
-                    // App is either not installed, or installed version doesn't match the version we're installing,
-                    // Either way, keep polling.
+                if !isVersionInstalled
+                {
+                    // App version is not installed...supposedly.
                     
-                    try await Task.sleep(for: .milliseconds(50))
-                    continue
+                    if !isInstalled
+                    {
+                        // App itself apparently isn't installed, but check if we can open URL as fallback.
+                        
+                        if let openURL = await $storeApp._installedOpenURL, await UIApplication.shared.canOpenURL(openURL)
+                        {
+                            Logger.sideload.info("Fallback Open URL check for \(bundleID, privacy: .public) succeeded, assuming installation finished successfully.")
+                        }
+                        else
+                        {
+                            try await Task.sleep(for: .milliseconds(50))
+                            continue
+                        }
+                    }
+                    else
+                    {
+                        // App is either not installed, or installed version doesn't match the version we're installing,
+                        // Either way, keep polling.
+                                            
+                        try await Task.sleep(for: .milliseconds(50))
+                        continue
+                    }
                 }
                 
                 if !didAddChildProgress
