@@ -42,6 +42,7 @@ public extension StoreApp
     
     static let deltaAppID = "com.rileytestut.Delta"
     static let clipAppID = "com.rileytestut.Clip"
+    static let notarizationSucksAppID = "com.rileytestut.Notarization-Sucks"
 }
 
 private struct PatreonParameters: Decodable
@@ -546,6 +547,10 @@ public extension StoreApp
         else if self.bundleIdentifier.contains(StoreApp.clipAppID)
         {
             return URL(string: "clip://")
+        }
+        else if self.bundleIdentifier.contains(StoreApp.notarizationSucksAppID)
+        {
+            return URL(string: "notarization-sucks://")
         }
         else
         {
