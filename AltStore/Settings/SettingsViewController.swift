@@ -24,6 +24,7 @@ extension SettingsViewController
         case display
         case appRefresh
         case instructions
+        case billing
         case techyThings
         case credits
         case support
@@ -263,6 +264,16 @@ private extension SettingsViewController
             
         case .instructions:
             break
+            
+        case .billing:
+            if isHeader
+            {
+                settingsHeaderFooterView.primaryLabel.text = NSLocalizedString("BILLING", comment: "")
+            }
+            else
+            {
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Manage your AltStore PAL annual subscription.", comment: "")
+            }
             
         case .techyThings:
             if isHeader
@@ -584,7 +595,7 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return nil
         case .signIn where self.activeTeam != nil: return nil
         case .account where self.activeTeam == nil: return nil
-        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .support, .macDirtyCow, .debug:
+        case .signIn, .account, .patreon, .display, .appRefresh, .billing, .techyThings, .credits, .support, .macDirtyCow, .debug:
             let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "HeaderFooterView") as! SettingsHeaderFooterView
             self.prepare(headerView, for: section, isHeader: true)
             return headerView
@@ -600,7 +611,7 @@ extension SettingsViewController
         {
         case _ where isSectionHidden(section): return nil
         case .signIn where self.activeTeam != nil: return nil
-        case .signIn, .patreon, .display, .appRefresh, .techyThings, .macDirtyCow:
+        case .signIn, .patreon, .display, .appRefresh, .billing, .techyThings, .macDirtyCow:
             let footerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "HeaderFooterView") as! SettingsHeaderFooterView
             self.prepare(footerView, for: section, isHeader: false)
             return footerView
@@ -617,7 +628,7 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return 1.0
         case .signIn where self.activeTeam != nil: return 1.0
         case .account where self.activeTeam == nil: return 1.0
-        case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .support, .macDirtyCow, .debug:
+        case .signIn, .account, .patreon, .display, .appRefresh, .billing, .techyThings, .credits, .support, .macDirtyCow, .debug:
             let height = self.preferredHeight(for: self.prototypeHeaderFooterView, in: section, isHeader: true)
             return height
             
@@ -633,7 +644,7 @@ extension SettingsViewController
         case _ where isSectionHidden(section): return 1.0
         case .signIn where self.activeTeam != nil: return 1.0
         case .account where self.activeTeam == nil: return 1.0            
-        case .signIn, .patreon, .display, .appRefresh, .techyThings, .macDirtyCow:
+        case .signIn, .patreon, .display, .appRefresh, .billing, .techyThings, .macDirtyCow:
             let height = self.preferredHeight(for: self.prototypeHeaderFooterView, in: section, isHeader: false)
             return height
             
@@ -649,13 +660,24 @@ extension SettingsViewController
         let section = Section.allCases[indexPath.section]
         switch section
         {
-        case .signIn: self.signIn()
+        case .signIn: 
+            self.signIn()
+            
         case .appRefresh:
             let row = AppRefreshRow.allCases[indexPath.row]
             switch row
             {
             case .backgroundRefresh: break
             case .addToSiri: self.addRefreshAppsShortcut()
+            }
+            
+        case .billing:
+            let safariURL = URL(string: "https://billing.stripe.com/p/login/7sI3eP9SieGMgRq6oo")!
+            UIApplication.shared.open(safariURL)
+            
+            if let selectedIndexPath = self.tableView.indexPathForSelectedRow
+            {
+                self.tableView.deselectRow(at: selectedIndexPath, animated: true)
             }
             
         case .techyThings:
