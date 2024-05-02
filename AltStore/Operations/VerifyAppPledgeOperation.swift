@@ -76,6 +76,22 @@ class VerifyAppPledgeOperation: ResultOperation<Void>
                                                                                 message: NSLocalizedString("This app supports custom pledges. Pledge any amount on Patreon to receive access.", comment: ""),
                                                                                 primaryAction: action)
                     }
+                    else if let pledgeAmount = await self.$storeApp.pledgeAmount, pledgeAmount == 0
+                    {                        
+                        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
+                            DispatchQueue.main.async {
+                                let joinPatreonViewController = JoinPatreonViewController(storeApp: self.storeApp)
+                                joinPatreonViewController.completionHandler = { result in
+                                    continuation.resume(with: result)
+                                }
+                                
+                                let navigationController = UINavigationController(rootViewController: joinPatreonViewController)
+                                presentingViewController.present(navigationController, animated: true)
+                            }
+                        }
+                        
+                        checkoutURL = patreonURL
+                    }
                     else if !username.isEmpty, let url = URL(string: "https://www.patreon.com/join/" + username)
                     {
                         // Prefer /join URL over campaign homepage.

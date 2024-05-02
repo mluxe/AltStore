@@ -372,6 +372,8 @@
 		D537C8592AA94D94009A1E08 /* altjit in Embed AltJIT */ = {isa = PBXBuildFile; fileRef = D5FB7A132AA284BE00EF863D /* altjit */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D537C85B2AA9507A009A1E08 /* libcorecrypto.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D537C85A2AA95066009A1E08 /* libcorecrypto.tbd */; platformFilters = (macos, ); };
 		D5390C3C2AC3A43900D17E62 /* AddSourceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5390C3B2AC3A43900D17E62 /* AddSourceViewController.swift */; };
+		D5399FAE2BE56B030038DDEF /* JoinPatreonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5399FAD2BE56B030038DDEF /* JoinPatreonViewController.swift */; };
+		D5399FB02BE56B120038DDEF /* JoinPatreonViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D5399FAF2BE56B120038DDEF /* JoinPatreonViewController.xib */; };
 		D53D84022A2158FC00543C3B /* Permissions.plist in Resources */ = {isa = PBXBuildFile; fileRef = D53D84012A2158FC00543C3B /* Permissions.plist */; };
 		D54058B92A1D6269008CCC58 /* AppPermissionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54058B82A1D6269008CCC58 /* AppPermissionProtocol.swift */; };
 		D54058BB2A1D8FE3008CCC58 /* UIColor+AltStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54058BA2A1D8FE3008CCC58 /* UIColor+AltStore.swift */; };
@@ -1044,6 +1046,8 @@
 		D533E8BD2727BBF800A9B5DD /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = Dependencies/libcurl/libcurl.a; sourceTree = SOURCE_ROOT; };
 		D537C85A2AA95066009A1E08 /* libcorecrypto.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcorecrypto.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/lib/system/libcorecrypto.tbd; sourceTree = DEVELOPER_DIR; };
 		D5390C3B2AC3A43900D17E62 /* AddSourceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSourceViewController.swift; sourceTree = "<group>"; };
+		D5399FAD2BE56B030038DDEF /* JoinPatreonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinPatreonViewController.swift; sourceTree = "<group>"; };
+		D5399FAF2BE56B120038DDEF /* JoinPatreonViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = JoinPatreonViewController.xib; sourceTree = "<group>"; };
 		D53D84012A2158FC00543C3B /* Permissions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Permissions.plist; sourceTree = "<group>"; };
 		D54058B82A1D6269008CCC58 /* AppPermissionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissionProtocol.swift; sourceTree = "<group>"; };
 		D54058BA2A1D8FE3008CCC58 /* UIColor+AltStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+AltStore.swift"; sourceTree = "<group>"; };
@@ -1984,6 +1988,8 @@
 				D5AE997A2B64791E0068B366 /* AppMarketplace.swift */,
 				D5CF17252B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift */,
 				D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */,
+				D5399FAD2BE56B030038DDEF /* JoinPatreonViewController.swift */,
+				D5399FAF2BE56B120038DDEF /* JoinPatreonViewController.xib */,
 			);
 			path = "Managing Apps";
 			sourceTree = "<group>";
@@ -2902,6 +2908,7 @@
 				BFE60738231ADF49002B0E8E /* Settings.storyboard in Resources */,
 				D5144BA82B8684EF00738A5C /* Icons.xcassets in Resources */,
 				D57DF638271E32F000677701 /* PatchApp.storyboard in Resources */,
+				D5399FB02BE56B120038DDEF /* JoinPatreonViewController.xib in Resources */,
 				BFD2477A2284B9A700981D42 /* LaunchScreen.storyboard in Resources */,
 				BF44EEF3246B3A17002A52F2 /* AltBackup.ipa in Resources */,
 				D56D21422B7D9C41007641C5 /* AltIcons.plist in Resources */,
@@ -3357,6 +3364,7 @@
 				D57F2C9126E0070200B9FA39 /* EnableJITOperation.swift in Sources */,
 				BF8CAE4E248AEABA004D6CCE /* UIDevice+Jailbreak.swift in Sources */,
 				D5E1E7C128077DE90016FC96 /* UpdateKnownSourcesOperation.swift in Sources */,
+				D5399FAE2BE56B030038DDEF /* JoinPatreonViewController.swift in Sources */,
 				BFE338DF22F0EADB002E24B9 /* FetchSourceOperation.swift in Sources */,
 				D54DED1428CBC44B008B27A0 /* ErrorLogTableViewCell.swift in Sources */,
 				D5390C3C2AC3A43900D17E62 /* AddSourceViewController.swift in Sources */,

@@ -37,8 +37,8 @@ public class PatreonAccount: NSManagedObject, Fetchable
         self.firstName = account.firstName
         
         let pledges = account.pledges?.compactMap { patron -> Pledge? in
-            // First ensure pledge is active.
-            guard patron.status == .active else { return nil }
+            // First ensure pledge is active OR patron is free member.
+            guard patron.status == .active || patron.status == .free else { return nil }
             
             guard let pledge = Pledge(patron: patron, context: context) else { return nil }
             

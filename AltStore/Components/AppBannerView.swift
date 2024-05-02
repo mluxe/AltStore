@@ -348,7 +348,17 @@ extension AppBannerView
                     }
                     else
                     {
-                        let buttonTitle = NSLocalizedString("Pledge", comment: "")
+                        let buttonTitle: String
+                        
+                        if let amount = storeApp.pledgeAmount, amount == 0.0
+                        {
+                            buttonTitle = NSLocalizedString("Free", comment: "")
+                        }
+                        else
+                        {
+                            buttonTitle = NSLocalizedString("Pledge", comment: "")
+                        }
+                        
                         self.button.setTitle(buttonTitle.uppercased(), for: .normal)
                         self.button.accessibilityLabel = buttonTitle
                         self.button.accessibilityValue = buttonTitle

@@ -34,6 +34,7 @@ extension PatreonAPI
         case declined = "declined_patron"
         case former = "former_patron"
         case unknown = "unknown"
+        case free = "free"
     }
     
     // Roughly equivalent to AltStoreCore.Pledge
@@ -42,7 +43,7 @@ extension PatreonAPI
         public var name: String?
         public var identifier: String
         public var pledgeAmount: Decimal?
-        public var status: Status
+        public var status: Status = .unknown
         
         // Relationships
         public var campaign: Campaign?
@@ -54,15 +55,6 @@ extension PatreonAPI
             self.name = response.attributes.full_name
             self.identifier = response.id
             self.pledgeAmount = Decimal(response.attributes.currently_entitled_amount_cents) / 100
-            
-            if let status = response.attributes.patron_status
-            {
-                self.status = Status(rawValue: status) ?? .unknown
-            }
-            else
-            {
-                self.status = .unknown
-            }
             
             guard let included, let relationships = response.relationships else { return }
             
@@ -77,6 +69,22 @@ extension PatreonAPI
             
             let benefits = tiers.flatMap { $0.benefits }
             self.benefits = Set(benefits)
+            
+            let status = Status(rawValue: response.attributes.patron_status ?? "") ?? .unknown
+            if status == .active
+            {
+                // Active status is always active, regardless of current tiers.
+                self.status = .active
+            }
+            else if tiers.contains(where: { $0.amount == 0 })
+            {
+                // Not active, but belongs to free tier, so treat as free member.
+                self.status = .free
+            }
+            else
+            {
+                self.status = status
+            }
         }
     }
 }
