@@ -4253,7 +4253,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6P6G44MPGD;
 				ENABLE_BITCODE = NO;
@@ -4268,7 +4268,7 @@
 					"$(PROJECT_DIR)/Dependencies/fragmentzip",
 					"$(PROJECT_DIR)/Dependencies/libcurl",
 				);
-				MARKETING_VERSION = 2.0rc;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -4294,7 +4294,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6P6G44MPGD;
 				ENABLE_BITCODE = NO;
@@ -4309,7 +4309,7 @@
 					"$(PROJECT_DIR)/Dependencies/fragmentzip",
 					"$(PROJECT_DIR)/Dependencies/libcurl",
 				);
-				MARKETING_VERSION = 2.0rc;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.altstore.AltStore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
