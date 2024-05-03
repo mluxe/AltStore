@@ -342,6 +342,20 @@ private extension AppMarketplace
         
         let bundleID = await $storeApp.bundleIdentifier
         InstallTaskContext.beginInstallationHandler?(bundleID) // TODO: Is this called too early?
+        
+        guard bundleID != StoreApp.altstoreAppID else {
+            // MarketplaceKit doesn't support updating marketplaces themselves (🙄)
+            // so we have to ask user to manually update AltStore via Safari.
+            // TODO: Figure out how to handle beta AltStore
+            
+            await MainActor.run {
+                let openURL = URL(string: "https://altstore.io/update-pal")!
+                UIApplication.shared.open(openURL)
+            }
+            
+            // Cancel installation and let user manually update.
+            throw CancellationError()
+        }
                 
         let installMarketplaceAppViewController = await MainActor.run { [operation] () -> InstallMarketplaceAppViewController? in
             
