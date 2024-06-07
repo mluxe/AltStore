@@ -13,7 +13,13 @@ import AltStoreCore
 private extension URL
 {
     #if MARKETPLACE
+    
+    #if STAGING
+    static let sources = URL(string: "https://f000.backblazeb2.com/file/altstore-staging/altstore/marketplace-sources.json")!
+    #else
     static let sources = URL(string: "https://cdn.altstore.io/file/altstore/altstore/marketplace-sources.json")!
+    #endif
+    
     #elseif STAGING
     static let sources = URL(string: "https://f000.backblazeb2.com/file/altstore-staging/altstore/sources.json")!
     #else
