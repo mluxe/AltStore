@@ -10,23 +10,15 @@ import Foundation
 
 import AltStoreCore
 
-import AppCenter
-import AppCenterAnalytics
-import AppCenterCrashes
+import TelemetryClient
 
 #if MARKETPLACE
 
-private let appCenterAppSecret = "b2f7b2a3-5027-45a7-822d-0823ade8cf34"
+private let telemetryDeckAppID = "67F64B51-C3E4-42A5-9CA2-300CCAFA55C9"
 
 #else
 
-#if DEBUG
-private let appCenterAppSecret = "bb08e9bb-c126-408d-bf3f-324c8473fd40"
-#elseif RELEASE
-private let appCenterAppSecret = "b6718932-294a-432b-81f2-be1e17ff85c5"
-#else
-private let appCenterAppSecret = "e873f6ca-75eb-4685-818f-801e0e375d60"
-#endif
+private let telemetryDeckAppID = ""
 
 #endif
 
@@ -54,7 +46,7 @@ extension AnalyticsManager
         case updatedApp(InstalledApp)
         case refreshedApp(InstalledApp)
         
-        var name: String {
+        var name: TelemetrySignalType {
             switch self
             {
             case .installedApp: return "installed_app"
@@ -106,10 +98,8 @@ extension AnalyticsManager
 {
     func start()
     {
-        AppCenter.start(withAppSecret: appCenterAppSecret, services: [
-            Analytics.self,
-            Crashes.self
-        ])
+        let configuration = TelemetryManagerConfiguration(appID: telemetryDeckAppID)
+        TelemetryManager.initialize(with: configuration)
     }
     
     func trackEvent(_ event: Event)
@@ -118,6 +108,6 @@ extension AnalyticsManager
             properties[item.key.rawValue] = item.value
         }
         
-        Analytics.trackEvent(event.name, withProperties: properties)
+        TelemetryManager.send(event.name, with: properties)
     }
 }

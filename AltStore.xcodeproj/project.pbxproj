@@ -369,6 +369,7 @@
 		D52DD35E2AAA89A600A7F2B6 /* AltSign-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = D52DD35D2AAA89A600A7F2B6 /* AltSign-Dynamic */; };
 		D52EF2BE2A0594550096C377 /* AppDetailCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52EF2BD2A0594550096C377 /* AppDetailCollectionViewController.swift */; };
 		D533E8B72727841800A9B5DD /* libAppleArchive.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D533E8B62727841800A9B5DD /* libAppleArchive.tbd */; settings = {ATTRIBUTES = (Weak, ); }; };
+		D535CEE82BE95D4C00F96119 /* TelemetryClient in Frameworks */ = {isa = PBXBuildFile; productRef = D535CEE72BE95D4C00F96119 /* TelemetryClient */; };
 		D537C8592AA94D94009A1E08 /* altjit in Embed AltJIT */ = {isa = PBXBuildFile; fileRef = D5FB7A132AA284BE00EF863D /* altjit */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D537C85B2AA9507A009A1E08 /* libcorecrypto.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D537C85A2AA95066009A1E08 /* libcorecrypto.tbd */; platformFilters = (macos, ); };
 		D5390C3C2AC3A43900D17E62 /* AddSourceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5390C3B2AC3A43900D17E62 /* AddSourceViewController.swift */; };
@@ -1233,6 +1234,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D533E8B72727841800A9B5DD /* libAppleArchive.tbd in Frameworks */,
+				D535CEE82BE95D4C00F96119 /* TelemetryClient in Frameworks */,
 				BF1614F1250822F100767AEA /* Roxas.framework in Frameworks */,
 				BF088D332501A4FF008082D9 /* OpenSSL.xcframework in Frameworks */,
 				BF66EE852501AE50007EE018 /* AltStoreCore.framework in Frameworks */,
@@ -2666,6 +2668,9 @@
 				D5BD17D62B6474FF00BAE633 /* PBXTargetDependency */,
 			);
 			name = AltStore;
+			packageProductDependencies = (
+				D535CEE72BE95D4C00F96119 /* TelemetryClient */,
+			);
 			productName = AltStore;
 			productReference = BFD2476A2284B9A500981D42 /* AltStore.app */;
 			productType = "com.apple.product-type.application";
@@ -2832,6 +2837,7 @@
 			packageReferences = (
 				D58D5F2C26DFE68E00E55E38 /* XCRemoteSwiftPackageReference "LaunchAtLogin" */,
 				D5FB7A2C2AA2859400EF863D /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+				D535CEE62BE95D4C00F96119 /* XCRemoteSwiftPackageReference "SwiftClient" */,
 			);
 			productRefGroup = BFD2476B2284B9A500981D42 /* Products */;
 			projectDirPath = "";
@@ -4715,6 +4721,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		D535CEE62BE95D4C00F96119 /* XCRemoteSwiftPackageReference "SwiftClient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TelemetryDeck/SwiftClient";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.1;
+			};
+		};
 		D58D5F2C26DFE68E00E55E38 /* XCRemoteSwiftPackageReference "LaunchAtLogin" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin.git";
@@ -4749,6 +4763,11 @@
 		D52DD35D2AAA89A600A7F2B6 /* AltSign-Dynamic */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = "AltSign-Dynamic";
+		};
+		D535CEE72BE95D4C00F96119 /* TelemetryClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D535CEE62BE95D4C00F96119 /* XCRemoteSwiftPackageReference "SwiftClient" */;
+			productName = TelemetryClient;
 		};
 		D561B2EA28EF5A4F006752E4 /* AltSign-Dynamic */ = {
 			isa = XCSwiftPackageProductDependency;
