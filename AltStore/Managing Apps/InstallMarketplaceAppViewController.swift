@@ -13,6 +13,19 @@ import AltStoreCore
 
 import Roxas
 
+fileprivate extension URL
+{
+    static func redirectURL(for downloadURL: URL) throws -> URL
+    {
+        var components = URLComponents(string: AppMarketplace.marketplaceDomain, encodingInvalidCharacters: true)!
+        components.path += "install"
+        components.queryItems = [URLQueryItem(name: "downloadURL", value: downloadURL.absoluteString)]
+
+        guard let redirectURL = components.url else { throw OperationError.unknown(failureReason: NSLocalizedString("Invalid ADP download URL.", comment: "")) }
+        return redirectURL
+    }
+}
+
 extension InstallMarketplaceAppViewController
 {
     enum Section: Int
@@ -77,7 +90,7 @@ class InstallMarketplaceAppViewController: UICollectionViewController
         super.viewDidLoad()
         
         self.collectionView.isScrollEnabled = false
-                
+        
         self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: RSTCellContentGenericCellIdentifier)
         self.collectionView.register(ActionButtonCell.self, forCellWithReuseIdentifier: "ActionButtonCell")
         
@@ -114,10 +127,22 @@ class InstallMarketplaceAppViewController: UICollectionViewController
             sheetController.prefersGrabberVisible = true
         }
         
-        self.prepareActionButton()
+        do
+        {
+            try self.prepareActionButton()
+        }
+        catch
+        {
+            Logger.sideload.error("Failed to prepare action button. \(error.localizedDescription, privacy: .public)")
+            self.completionHandler?(.failure(error))
+            return
+        }
     }
-    
-    func prepareActionButton()
+}
+
+private extension InstallMarketplaceAppViewController
+{
+    func prepareActionButton() throws
     {
         var action: ActionButton.Action?
         var tintColor: UIColor?
@@ -134,13 +159,14 @@ class InstallMarketplaceAppViewController: UICollectionViewController
         case .install(let storeApp):
             //TODO: How do we handle fallback of downloading older iOS version if we have to pick the not-latest version? Does provided URL not matter?
             // JK, it'll only ever fall back to latestSupportedVersion, so just supply that
-            guard let marketplaceID = storeApp.marketplaceID, let downloadURL = storeApp.latestSupportedVersion?.downloadURL else { break }
+            guard let marketplaceID = storeApp.marketplaceID, let adpURL = storeApp.latestSupportedVersion?.downloadURL else { break }
                      
             let bundleID = storeApp.bundleIdentifier
             tintColor = storeApp.tintColor
             appName = storeApp.name
             
             //TODO: Do accounts matter?
+            let downloadURL = try URL.redirectURL(for: adpURL)
             let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: self.isRedownload),
                                               confirmInstall: {
                 do
@@ -164,12 +190,13 @@ class InstallMarketplaceAppViewController: UICollectionViewController
             action = .install(config)
             
         case .update(let installedApp):
-            guard let storeApp = installedApp.storeApp, let marketplaceID = storeApp.marketplaceID, let downloadURL = storeApp.latestSupportedVersion?.downloadURL else { break }
+            guard let storeApp = installedApp.storeApp, let marketplaceID = storeApp.marketplaceID, let adpURL = storeApp.latestSupportedVersion?.downloadURL else { break }
             
             let bundleID = storeApp.bundleIdentifier
             tintColor = storeApp.tintColor
             appName = storeApp.name
             
+            let downloadURL = try URL.redirectURL(for: adpURL)
             let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: true),
                                               confirmInstall: {
                 do

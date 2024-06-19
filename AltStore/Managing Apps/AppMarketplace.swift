@@ -54,6 +54,16 @@ private extension AppMarketplace
 }
 
 @available(iOS 17.4, *)
+extension AppMarketplace
+{
+    #if STAGING
+    static let marketplaceDomain = "https://6xxqrbufz0.execute-api.eu-central-1.amazonaws.com"
+    #else
+    static let marketplaceDomain = "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com"
+    #endif
+}
+
+@available(iOS 17.4, *)
 actor AppMarketplace
 {
     static let shared = AppMarketplace()
