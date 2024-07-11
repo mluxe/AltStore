@@ -393,6 +393,8 @@ private extension AppMarketplace
             return installMarketplaceAppViewController
         }
         
+        #if !DEBUG
+        
         if let installMarketplaceAppViewController
         {
             guard let presentingViewController = InstallTaskContext.presentingViewController else { throw OperationError.unknown(failureReason: NSLocalizedString("Could not determine presenting context.", comment: "")) }
@@ -549,6 +551,8 @@ private extension AppMarketplace
                 break
             }
         }
+        
+        #endif
         
         let backgroundContext = DatabaseManager.shared.persistentContainer.newBackgroundContext()
         
