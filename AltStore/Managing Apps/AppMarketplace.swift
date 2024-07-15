@@ -14,13 +14,6 @@ import AltStoreCore
 // App == InstalledApp
 
 @available(iOS 17.4, *)
-extension AppLibrary
-{
-    //TODO: Tie to iCloud value
-    static let `defaultAccount` = "AltStore"
-}
-
-@available(iOS 17.4, *)
 private extension AppMarketplace
 {
     struct InstallTaskContext
@@ -56,10 +49,12 @@ private extension AppMarketplace
 @available(iOS 17.4, *)
 extension AppMarketplace
 {
+    static let defaultAccount = "AltStore"
+    
     #if STAGING
-    static let marketplaceDomain = "https://6xxqrbufz0.execute-api.eu-central-1.amazonaws.com"
+    static let marketplaceDomain = "https://dev.altstore.io"
     #else
-    static let marketplaceDomain = "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com"
+    static let marketplaceDomain = "https://api.altstore.io"
     #endif
 }
 

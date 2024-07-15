@@ -428,6 +428,7 @@
 		D59A6B822AA92D1C00F61259 /* Process+Conveniences.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59A6B802AA92D1C00F61259 /* Process+Conveniences.swift */; };
 		D59A6B842AA932F700F61259 /* Logger+AltServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59A6B832AA932F700F61259 /* Logger+AltServer.swift */; };
 		D59B43DB2B97546200619B71 /* UIViewController+OpenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59B43DA2B97546200619B71 /* UIViewController+OpenApp.swift */; };
+		D59F3E462C45B0E500D20DFA /* URL+ADP.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59F3E452C45B0E500D20DFA /* URL+ADP.swift */; };
 		D5A0537329B91DB400997551 /* SourceDetailContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A0537229B91DB400997551 /* SourceDetailContentViewController.swift */; };
 		D5A1D2E42AA50EB60066CACC /* JITError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A1D2E32AA50EB60066CACC /* JITError.swift */; };
 		D5A1D2E92AA512940066CACC /* RemoteServiceDiscoveryTunnel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A1D2E82AA512940066CACC /* RemoteServiceDiscoveryTunnel.swift */; };
@@ -1105,6 +1106,7 @@
 		D59A6B802AA92D1C00F61259 /* Process+Conveniences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Process+Conveniences.swift"; sourceTree = "<group>"; };
 		D59A6B832AA932F700F61259 /* Logger+AltServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+AltServer.swift"; sourceTree = "<group>"; };
 		D59B43DA2B97546200619B71 /* UIViewController+OpenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+OpenApp.swift"; sourceTree = "<group>"; };
+		D59F3E452C45B0E500D20DFA /* URL+ADP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+ADP.swift"; sourceTree = "<group>"; };
 		D5A0537229B91DB400997551 /* SourceDetailContentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceDetailContentViewController.swift; sourceTree = "<group>"; };
 		D5A1D2E32AA50EB60066CACC /* JITError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JITError.swift; sourceTree = "<group>"; };
 		D5A1D2E82AA512940066CACC /* RemoteServiceDiscoveryTunnel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteServiceDiscoveryTunnel.swift; sourceTree = "<group>"; };
@@ -2054,6 +2056,7 @@
 				D5A645202AF591980047D980 /* UTType+AltStore.swift */,
 				D52C73642B688B2200E8751C /* InstalledApp+LoadIcon.swift */,
 				D59B43DA2B97546200619B71 /* UIViewController+OpenApp.swift */,
+				D59F3E452C45B0E500D20DFA /* URL+ADP.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3383,6 +3386,7 @@
 				BF3BEFC124086A1E00DE7D55 /* RefreshAppOperation.swift in Sources */,
 				BFE60740231AFD2A002B0E8E /* InsetGroupTableViewCell.swift in Sources */,
 				BF0DCA662433BDF500E3A595 /* AnalyticsManager.swift in Sources */,
+				D59F3E462C45B0E500D20DFA /* URL+ADP.swift in Sources */,
 				D5418F172AD740890014ABD6 /* AppScreenshotCollectionViewCell.swift in Sources */,
 				BFCCB51A245E3401001853EA /* VerifyAppOperation.swift in Sources */,
 				BFF0B6982322CAB8007A79E1 /* InstructionsViewController.swift in Sources */,

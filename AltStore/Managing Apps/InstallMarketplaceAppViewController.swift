@@ -13,19 +13,6 @@ import AltStoreCore
 
 import Roxas
 
-fileprivate extension URL
-{
-    static func redirectURL(for downloadURL: URL) throws -> URL
-    {
-        var components = URLComponents(string: AppMarketplace.marketplaceDomain, encodingInvalidCharacters: true)!
-        components.path += "install"
-        components.queryItems = [URLQueryItem(name: "downloadURL", value: downloadURL.absoluteString)]
-
-        guard let redirectURL = components.url else { throw OperationError.unknown(failureReason: NSLocalizedString("Invalid ADP download URL.", comment: "")) }
-        return redirectURL
-    }
-}
-
 extension InstallMarketplaceAppViewController
 {
     enum Section: Int
@@ -134,12 +121,18 @@ class InstallMarketplaceAppViewController: UICollectionViewController
         catch
         {
             Logger.sideload.error("Failed to prepare action button. \(error.localizedDescription, privacy: .public)")
-            self.completionHandler?(.failure(error))
-            return
+            
+            let alertController = UIAlertController(title: NSLocalizedString("Unable to Prepare App", comment: ""), message: error.localizedDescription, preferredStyle: .alert)
+            alertController.addAction(.ok)
+            self.present(alertController, animated: true)
+            
+            // Don't call completionHandler, let user cancel operation themselves.
+            // self.completionHandler?(.failure(error))
         }
     }
 }
 
+@available(iOS 17.4, *)
 private extension InstallMarketplaceAppViewController
 {
     func prepareActionButton() throws
@@ -166,8 +159,8 @@ private extension InstallMarketplaceAppViewController
             appName = storeApp.name
             
             //TODO: Do accounts matter?
-            let downloadURL = try URL.redirectURL(for: adpURL)
-            let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: self.isRedownload),
+            guard let downloadURL = URL.installURL(for: adpURL) else { throw OperationError.unknown(failureReason: NSLocalizedString("Invalid ADP install URL.", comment: "")) }
+            let config = InstallConfiguration(install: .init(account: AppMarketplace.defaultAccount, appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: self.isRedownload),
                                               confirmInstall: {
                 do
                 {
@@ -196,8 +189,8 @@ private extension InstallMarketplaceAppViewController
             tintColor = storeApp.tintColor
             appName = storeApp.name
             
-            let downloadURL = try URL.redirectURL(for: adpURL)
-            let config = InstallConfiguration(install: .init(account: "AltStore", appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: true),
+            guard let downloadURL = URL.installURL(for: adpURL) else { throw OperationError.unknown(failureReason: NSLocalizedString("Invalid ADP update URL.", comment: "")) }
+            let config = InstallConfiguration(install: .init(account: AppMarketplace.defaultAccount, appleItemID: marketplaceID, alternativeDistributionPackage: downloadURL, isUpdate: true),
                                               confirmInstall: {
                 do
                 {
