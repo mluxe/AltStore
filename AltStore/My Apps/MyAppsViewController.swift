@@ -1335,6 +1335,30 @@ private extension MyAppsViewController
             }
         }))
         
+        var indexPath: IndexPath?
+        
+        if installedApp.isActive
+        {
+            if let localIndexPath = self.activeAppsDataSource.fetchedResultsController.indexPath(forObject: installedApp)
+            {
+                indexPath = IndexPath(item: localIndexPath.item, section: Section.activeApps.rawValue)
+            }
+        }
+        else
+        {
+            if let localIndexPath = self.inactiveAppsDataSource.fetchedResultsController.indexPath(forObject: installedApp)
+            {
+                indexPath = IndexPath(item: localIndexPath.item, section: Section.inactiveApps.rawValue)
+            }
+        }
+        
+        if let indexPath
+        {
+            let attributes = self.collectionView.layoutAttributesForItem(at: indexPath)
+            alertController.popoverPresentationController?.sourceView = self.collectionView
+            alertController.popoverPresentationController?.sourceRect = attributes?.frame ?? .zero
+        }
+        
         self.present(alertController, animated: true, completion: nil)
     }
     
