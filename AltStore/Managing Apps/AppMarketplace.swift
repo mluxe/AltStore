@@ -250,15 +250,6 @@ private extension AppMarketplace
         
         do
         {
-            if let source = await $storeApp.source
-            {
-                let sourceID = await $storeApp.perform { $0.sourceIdentifier }
-                guard sourceID == Source.altStoreIdentifier else {
-                    // Only support installing apps from default source initially.
-                    throw SourceError.unsupported(source)
-                }
-            }
-            
             // Verify app version is supported
             try await $storeApp.perform { _ in
                 try self.verify(appVersion)
