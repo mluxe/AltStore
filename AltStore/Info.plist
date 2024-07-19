@@ -68,6 +68,16 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
+			<string>AltStore PAL</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>altstore-pal</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
 			<string>AltStore Backup</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
