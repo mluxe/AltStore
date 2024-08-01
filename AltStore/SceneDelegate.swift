@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import MarketplaceKit
+
 import AltStoreCore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate
@@ -160,6 +162,29 @@ private extension SceneDelegate
                 
             default: break
             }
+        }
+    }
+}
+
+extension SceneDelegate: MarketplaceSceneDelegate
+{
+    func scene(_ scene: UIWindowScene, askedToDisplay option: MarketplaceDisplayOption) 
+    {
+        switch option
+        {
+        case .productPage(let appleItemID, _):
+            DispatchQueue.main.async {
+                let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp._marketplaceID), appleItemID.description)
+                guard let storeApp = StoreApp.first(satisfying: predicate, in: DatabaseManager.shared.viewContext) else { return }
+                
+                NotificationCenter.default.post(name: AppDelegate.viewAppDeepLinkNotification, object: nil, userInfo: [AppDelegate.viewAppDeepLinkStoreAppKey: storeApp])
+            }
+            
+        case .searchResults(let query):
+            NotificationCenter.default.post(name: AppDelegate.searchDeepLinkNotification, object: nil, userInfo: [AppDelegate.searchDeepLinkQueryKey: query])
+            
+        case .authentication: break
+        @unknown default: break
         }
     }
 }
