@@ -28,6 +28,7 @@ class TabBarController: UITabBarController
     private var _viewDidAppear = false
     
     private var sourcesViewController: SourcesViewController!
+    private var featuredViewController: FeaturedViewController!
     
     required init?(coder aDecoder: NSCoder)
     {
@@ -37,6 +38,8 @@ class TabBarController: UITabBarController
         NotificationCenter.default.addObserver(self, selector: #selector(TabBarController.importApp(_:)), name: AppDelegate.importAppDeepLinkNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(TabBarController.presentSources(_:)), name: AppDelegate.addSourceDeepLinkNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(TabBarController.openErrorLog(_:)), name: ToastView.openErrorLogNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(TabBarController.openBrowseTab(_:)), name: AppDelegate.searchDeepLinkNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(TabBarController.viewApp(_:)), name: AppDelegate.viewAppDeepLinkNotification, object: nil)
     }
     
     override func viewDidLoad() 
@@ -45,6 +48,7 @@ class TabBarController: UITabBarController
         
         let browseNavigationController = self.viewControllers![Tab.browse.rawValue] as! UINavigationController
         browseNavigationController.tabBarItem.image = UIImage(systemName: "bag")
+        self.featuredViewController = browseNavigationController.viewControllers.first as? FeaturedViewController
         
         let sourcesNavigationController = self.viewControllers![Tab.sources.rawValue] as! UINavigationController
         self.sourcesViewController = sourcesNavigationController.viewControllers.first as? SourcesViewController
@@ -140,5 +144,43 @@ private extension TabBarController
     @objc func openErrorLog(_ notification: Notification)
     {
         self.selectedIndex = Tab.settings.rawValue
+    }
+    
+    @objc func openBrowseTab(_ notification: Notification)
+    {
+        self.selectedIndex = Tab.browse.rawValue
+        
+        if let query = notification.userInfo?[AppDelegate.searchDeepLinkQueryKey] as? String
+        {
+            self.featuredViewController.loadViewIfNeeded()
+            self.featuredViewController.searchController.searchBar.text = query
+            
+            self.featuredViewController.navigationController?.popToRootViewController(animated: false)
+            
+            // Slight delay to ensure the search controller is actually presented (YOLO).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.featuredViewController.searchController.isActive = true
+                self.featuredViewController.searchController.updateSearchResults(for: self.featuredViewController.searchController)
+            }
+        }
+    }
+    
+    @objc func viewApp(_ notification: Notification)
+    {
+        self.selectedIndex = Tab.browse.rawValue
+        
+        if let presentedViewController = self.presentedViewController
+        {
+            presentedViewController.dismiss(animated: true) {
+                self.viewApp(notification)
+            }
+            
+            return
+        }
+        
+        guard let storeApp = notification.userInfo?[AppDelegate.viewAppDeepLinkStoreAppKey] as? StoreApp else { return }
+        
+        let appViewController = AppViewController.makeAppViewController(app: storeApp)
+        self.featuredViewController.navigationController?.pushViewController(appViewController, animated: true)
     }
 }

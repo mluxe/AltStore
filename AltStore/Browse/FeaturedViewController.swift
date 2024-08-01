@@ -62,7 +62,7 @@ class FeaturedViewController: UICollectionViewController
     private lazy var categoriesDataSource = self.makeCategoriesDataSource()
     private lazy var featuredAppsDataSource = self.makeFeaturedAppsDataSource()
     
-    private var searchController: RSTSearchController!
+    internal private(set) var searchController: RSTSearchController!
     private var searchBrowseViewController: BrowseViewController!
     
     override func viewDidLoad()

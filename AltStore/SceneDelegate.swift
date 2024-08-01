@@ -138,6 +138,26 @@ private extension SceneDelegate
                     NotificationCenter.default.post(name: AppDelegate.addSourceDeepLinkNotification, object: nil, userInfo: [AppDelegate.addSourceDeepLinkURLKey: sourceURL])
                 }
                 
+            case "search":
+                // Use percent encoded query items to manually replace `+` with spaces before decoding them.
+                let queryItems = components.percentEncodedQueryItems?.reduce(into: [String: String]()) { $0[$1.name.lowercased()] = $1.value } ?? [:]
+                guard let rawQueryString = queryItems["q"], let queryString = rawQueryString.replacingOccurrences(of: "+", with: " ").removingPercentEncoding else { return }
+                                
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: AppDelegate.searchDeepLinkNotification, object: nil, userInfo: [AppDelegate.searchDeepLinkQueryKey: queryString])
+                }
+                
+            case "viewapp":
+                let queryItems = components.queryItems?.reduce(into: [String: String]()) { $0[$1.name.lowercased()] = $1.value } ?? [:]
+                guard let bundleID = queryItems["bundleid"] else { return }
+                                
+                DispatchQueue.main.async {
+                    let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp.bundleIdentifier), bundleID)
+                    guard let storeApp = StoreApp.first(satisfying: predicate, in: DatabaseManager.shared.viewContext) else { return }
+                    
+                    NotificationCenter.default.post(name: AppDelegate.viewAppDeepLinkNotification, object: nil, userInfo: [AppDelegate.viewAppDeepLinkStoreAppKey: storeApp])
+                }
+                
             default: break
             }
         }

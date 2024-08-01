@@ -24,12 +24,16 @@ extension AppDelegate
     static let openPatreonSettingsDeepLinkNotification = Notification.Name("com.rileytestut.AltStore.OpenPatreonSettingsDeepLinkNotification")
     static let importAppDeepLinkNotification = Notification.Name("com.rileytestut.AltStore.ImportAppDeepLinkNotification")
     static let addSourceDeepLinkNotification = Notification.Name("com.rileytestut.AltStore.AddSourceDeepLinkNotification")
+    static let viewAppDeepLinkNotification = Notification.Name("com.rileytestut.AltStore.ViewAppDeepLinkNotification")
+    static let searchDeepLinkNotification = Notification.Name("com.rileytestut.AltStore.SearchDeepLinkNotification")
     
     static let appBackupDidFinish = Notification.Name("com.rileytestut.AltStore.AppBackupDidFinish")
     
     static let importAppDeepLinkURLKey = "fileURL"
     static let appBackupResultKey = "result"
     static let addSourceDeepLinkURLKey = "sourceURL"
+    static let viewAppDeepLinkStoreAppKey = "storeApp"
+    static let searchDeepLinkQueryKey = "query"
 }
 
 @UIApplicationMain
