@@ -14,7 +14,7 @@ public struct InstallAppRequest: Codable
     public struct App: Codable
     {
         public var appleItemId: String
-        public var appleVersionId: String
+        public var appleVersionId: String?
     }
     
     public var apps: [App]
