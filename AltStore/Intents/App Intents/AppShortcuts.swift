@@ -8,6 +8,8 @@
 
 import AppIntents
 
+#if !MARKETPLACE
+
 @available(iOS 17, *)
 public struct ShortcutsProvider: AppShortcutsProvider
 {
@@ -27,3 +29,5 @@ public struct ShortcutsProvider: AppShortcutsProvider
         return .teal
     }
 }
+
+#endif

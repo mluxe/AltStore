@@ -41,6 +41,12 @@ extension View
     @ViewBuilder
     func activatesRefreshAllAppsIntent() -> some View
     {
+        #if MARKETPLACE
+        
+        self
+        
+        #else
+        
         if #available(iOSApplicationExtension 17, *)
         {
             Button(intent: RefreshAllAppsWidgetIntent()) {
@@ -52,5 +58,7 @@ extension View
         {
             self
         }
+        
+        #endif
     }
 }

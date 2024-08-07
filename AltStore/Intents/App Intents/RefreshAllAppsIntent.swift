@@ -11,6 +11,8 @@ import WidgetKit
 
 import AltStoreCore
 
+#if !MARKETPLACE
+
 // Shouldn't conform types we don't own to protocols we don't own, so make custom
 // NSError subclass that conforms to CustomLocalizedStringResourceConvertible instead.
 //
@@ -192,3 +194,5 @@ private extension RefreshAllAppsIntent
         }
     }
 }
+
+#endif

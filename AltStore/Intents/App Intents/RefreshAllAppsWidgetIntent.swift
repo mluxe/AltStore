@@ -8,6 +8,8 @@
 
 import AppIntents
 
+#if !MARKETPLACE
+
 @available(iOS 17, *)
 struct RefreshAllAppsWidgetIntent: AppIntent, ProgressReportingIntent
 {
@@ -43,3 +45,5 @@ struct RefreshAllAppsWidgetIntent: AppIntent, ProgressReportingIntent
 // so we "conform" RefreshAllAppsWidgetIntent to it in an `unavailable` extension ¯\_(ツ)_/¯
 @available(iOS, unavailable)
 extension RefreshAllAppsWidgetIntent: ForegroundContinuableIntent {}
+
+#endif
