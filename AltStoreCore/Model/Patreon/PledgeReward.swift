@@ -28,7 +28,10 @@ public class PledgeReward: NSManagedObject, Fetchable
     {
         super.init(entity: PledgeReward.entity(), insertInto: context)
         
-        self.name = benefit.name
+        // PatreonAPI no longer returns benefit name, so use empty string for backwards compatibility.
+        // self.name = benefit.name
+        self.name = ""
+        
         self.identifier = benefit.identifier.rawValue
     }
 }

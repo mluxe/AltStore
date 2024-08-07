@@ -10,24 +10,23 @@ import Foundation
 
 extension PatreonAPI
 {
-    typealias BenefitResponse = DataResponse<BenefitAttributes, AnyRelationships>
+    // PatreonAPI stopped returning full benefit metadata as of July 2024, so treat it like AnyItemResponse.
+    // struct BenefitAttributes: Decodable
+    // {
+    //     var title: String
+    // }
     
-    struct BenefitAttributes: Decodable
-    {
-        var title: String
-    }
+    typealias BenefitResponse = AnyItemResponse
 }
 
 extension PatreonAPI
 {
     public struct Benefit: Hashable
     {
-        public var name: String
         public var identifier: ALTPatreonBenefitID
         
         internal init(response: BenefitResponse)
         {
-            self.name = response.attributes.title
             self.identifier = ALTPatreonBenefitID(response.id)
         }
     }
