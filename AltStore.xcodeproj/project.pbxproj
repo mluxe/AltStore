@@ -393,6 +393,7 @@
 		D561AF822B21669400BF59C6 /* VerifyAppPledgeOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D561AF812B21669400BF59C6 /* VerifyAppPledgeOperation.swift */; };
 		D561B2EB28EF5A4F006752E4 /* AltSign-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = D561B2EA28EF5A4F006752E4 /* AltSign-Dynamic */; };
 		D561B2ED28EF5A4F006752E4 /* AltSign-Dynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = D561B2EA28EF5A4F006752E4 /* AltSign-Dynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		D56842A92C62A1A800FB1AB4 /* KeyedDecodingContainer+LocalizedValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56842A82C62A1A800FB1AB4 /* KeyedDecodingContainer+LocalizedValues.swift */; };
 		D56915072AD5E91B00A2B747 /* Regex+Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56915052AD5D75B00A2B747 /* Regex+Permissions.swift */; };
 		D56915092AD5F3E800A2B747 /* AltTests+Sources.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56915082AD5F3E800A2B747 /* AltTests+Sources.swift */; };
 		D569A5042AF9BC5F00A4CB8B /* ReviewPermissionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D569A5032AF9BC5F00A4CB8B /* ReviewPermissionsViewController.swift */; };
@@ -1067,6 +1068,7 @@
 		D557A4842AE88227007D0DCF /* PledgeTier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeTier.swift; sourceTree = "<group>"; };
 		D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = InstallMarketplaceApp.storyboard; sourceTree = "<group>"; };
 		D561AF812B21669400BF59C6 /* VerifyAppPledgeOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAppPledgeOperation.swift; sourceTree = "<group>"; };
+		D56842A82C62A1A800FB1AB4 /* KeyedDecodingContainer+LocalizedValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyedDecodingContainer+LocalizedValues.swift"; sourceTree = "<group>"; };
 		D56915052AD5D75B00A2B747 /* Regex+Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Regex+Permissions.swift"; sourceTree = "<group>"; };
 		D56915082AD5F3E800A2B747 /* AltTests+Sources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AltTests+Sources.swift"; sourceTree = "<group>"; };
 		D569A5032AF9BC5F00A4CB8B /* ReviewPermissionsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPermissionsViewController.swift; sourceTree = "<group>"; };
@@ -1729,6 +1731,7 @@
 				D56915052AD5D75B00A2B747 /* Regex+Permissions.swift */,
 				D5B6F6A82AD75D01007EED5A /* ProcessInfo+Previews.swift */,
 				D552EB052AF453F900A3AB4D /* URL+Normalized.swift */,
+				D56842A82C62A1A800FB1AB4 /* KeyedDecodingContainer+LocalizedValues.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3331,6 +3334,7 @@
 				BF66EEA62501AEC5007EE018 /* PatreonAPI.swift in Sources */,
 				BF66EED02501AECA007EE018 /* AltStore6ToAltStore7.xcmappingmodel in Sources */,
 				BF66EEDC2501AECA007EE018 /* MergePolicy.swift in Sources */,
+				D56842A92C62A1A800FB1AB4 /* KeyedDecodingContainer+LocalizedValues.swift in Sources */,
 				BF66EEE22501AECA007EE018 /* InstalledExtension.swift in Sources */,
 				D5927D6929DCE28700D6898E /* AltStore11ToAltStore12.xcmappingmodel in Sources */,
 				BF66EED62501AECA007EE018 /* NewsItem.swift in Sources */,

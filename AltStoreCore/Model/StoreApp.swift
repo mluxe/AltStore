@@ -213,6 +213,7 @@ public class StoreApp: NSManagedObject, Decodable, Fetchable
         case marketplaceID
         case developerName
         case localizedDescription
+        case localizedDescriptions = "_localizedDescriptions"
         case iconURL
         case screenshots
         case tintColor
@@ -245,8 +246,18 @@ public class StoreApp: NSManagedObject, Decodable, Fetchable
             self.name = try container.decode(String.self, forKey: .name)
             self.bundleIdentifier = try container.decode(String.self, forKey: .bundleIdentifier)
             self.developerName = try container.decode(String.self, forKey: .developerName)
-            self.localizedDescription = try container.decode(String.self, forKey: .localizedDescription)
             self.iconURL = try container.decode(URL.self, forKey: .iconURL)
+            
+            if let localizedDescription = try container.decodeLocalizedValue(String.self, forKey: .localizedDescriptions)
+            {
+                // Found matching localized description.
+                self.localizedDescription = localizedDescription
+            }
+            else
+            {
+                // No localized match, or no localized descriptions provided, so fall back to `localizedDescription`.
+                self.localizedDescription = try container.decode(String.self, forKey: .localizedDescription)
+            }
             
             self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
             self.isBeta = try container.decodeIfPresent(Bool.self, forKey: .isBeta) ?? false

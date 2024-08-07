@@ -120,6 +120,7 @@ public class Source: NSManagedObject, Fetchable, Decodable
         case sourceURL
         case subtitle
         case localizedDescription = "description"
+        case localizedDescriptions = "_localizedDescriptions"
         case iconURL
         case headerImageURL = "headerURL"
         case websiteURL = "website"
@@ -152,10 +153,18 @@ public class Source: NSManagedObject, Fetchable, Decodable
             // Optional Values
             self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
             self.websiteURL = try container.decodeIfPresent(URL.self, forKey: .websiteURL)
-            self.localizedDescription = try container.decodeIfPresent(String.self, forKey: .localizedDescription)
             self.iconURL = try container.decodeIfPresent(URL.self, forKey: .iconURL)
             self.headerImageURL = try container.decodeIfPresent(URL.self, forKey: .headerImageURL)
             self.patreonURL = try container.decodeIfPresent(URL.self, forKey: .patreonURL)
+            
+            if let localizedDescription = try container.decodeLocalizedValue(String.self, forKey: .localizedDescriptions)
+            {
+                self.localizedDescription = localizedDescription
+            }
+            else
+            {
+                self.localizedDescription = try container.decodeIfPresent(String.self, forKey: .localizedDescription)
+            }
             
             if let tintColorHex = try container.decodeIfPresent(String.self, forKey: .tintColor)
             {

@@ -62,6 +62,7 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
         case buildVersion
         case date
         case localizedDescription
+        case localizedDescriptions = "_localizedDescriptions"
         case downloadURL
         case size
         case sha256
@@ -83,7 +84,15 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
             self.buildVersion = try container.decodeIfPresent(String.self, forKey: .buildVersion)
             
             self.date = try container.decode(Date.self, forKey: .date)
-            self.localizedDescription = try container.decodeIfPresent(String.self, forKey: .localizedDescription)
+            
+            if let localizedDescription = try container.decodeLocalizedValue(String.self, forKey: .localizedDescriptions)
+            {
+                self.localizedDescription = localizedDescription
+            }
+            else
+            {
+                self.localizedDescription = try container.decodeIfPresent(String.self, forKey: .localizedDescription)
+            }
             
             self.downloadURL = try container.decode(URL.self, forKey: .downloadURL)
             self.size = try container.decode(Int64.self, forKey: .size)
