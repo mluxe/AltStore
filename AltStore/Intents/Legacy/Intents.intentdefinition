@@ -9,50 +9,24 @@
 	<key>INIntentDefinitionNamespace</key>
 	<string>KyhEWE</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>20A5354i</string>
+	<string>23D56</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
-	<string>12A8189n</string>
+	<string>15F31d</string>
 	<key>INIntentDefinitionToolsVersion</key>
-	<string>12.0</string>
+	<string>15.4</string>
 	<key>INIntents</key>
 	<array>
 		<dict>
 			<key>INIntentCategory</key>
 			<string>generic</string>
-			<key>INIntentConfigurable</key>
-			<true/>
 			<key>INIntentDescriptionID</key>
 			<string>62S1rm</string>
+			<key>INIntentIneligibleForSuggestions</key>
+			<true/>
 			<key>INIntentLastParameterTag</key>
 			<integer>3</integer>
-			<key>INIntentManagedParameterCombinations</key>
-			<dict>
-				<key></key>
-				<dict>
-					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
-					<true/>
-					<key>INIntentParameterCombinationTitle</key>
-					<string>Refresh All Apps</string>
-					<key>INIntentParameterCombinationTitleID</key>
-					<string>cJxa2I</string>
-					<key>INIntentParameterCombinationUpdatesLinked</key>
-					<true/>
-				</dict>
-			</dict>
 			<key>INIntentName</key>
 			<string>RefreshAll</string>
-			<key>INIntentParameterCombinations</key>
-			<dict>
-				<key></key>
-				<dict>
-					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
-					<true/>
-					<key>INIntentParameterCombinationTitle</key>
-					<string>Refresh All Apps</string>
-					<key>INIntentParameterCombinationTitleID</key>
-					<string>DKTGdO</string>
-				</dict>
-			</dict>
 			<key>INIntentResponse</key>
 			<dict>
 				<key>INIntentResponseCodes</key>
