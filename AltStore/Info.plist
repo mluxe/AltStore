@@ -10,6 +10,8 @@
 	<string>00008120-001270DA119B401E</string>
 	<key>ALTServerID</key>
 	<string>1F7D5B55-79CE-4546-A029-D4DDC4AF3B6D</string>
+	<key>ALTVersion</key>
+	<string>2.1</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDocumentTypes</key>
