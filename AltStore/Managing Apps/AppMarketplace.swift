@@ -28,7 +28,7 @@ private extension AppMarketplace
         static var operationContext: OperationContext = OperationContext()
         
         @TaskLocal
-        static var progress: Progress = Progress.discreteProgress(totalUnitCount: 100)
+        static var progress: Progress = Progress.discreteProgress(totalUnitCount: 0) // Default value is only created once, not per-task, so this is just a dummy Progress.
         
         @TaskLocal
         static var presentingViewController: UIViewController?
@@ -128,7 +128,8 @@ extension AppMarketplace
     
     func install(@AsyncManaged _ storeApp: StoreApp, presentingViewController: UIViewController?, beginInstallationHandler: ((String) -> Void)?) async -> (Task<AsyncManaged<InstalledApp>, Error>, Progress)
     {
-        let progress = InstallTaskContext.progress
+        let progress = Progress.discreteProgress(totalUnitCount: 100)
+        let context = OperationContext()
         
         let operation = AppManager.AppOperation.install(storeApp)
         AppManager.shared.set(progress, for: operation)
@@ -136,23 +137,27 @@ extension AppMarketplace
         let bundleID = await $storeApp.bundleIdentifier
         
         let task = Task<AsyncManaged<InstalledApp>, Error>(priority: .userInitiated) {
-            try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
-                try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
-                    try await InstallTaskContext.$beginInstallationHandler.withValue(beginInstallationHandler) {
-                        do
-                        {
-                            let installedApp = try await self.install(storeApp, preferredVersion: nil, presentingViewController: presentingViewController, operation: operation)
-                            await installedApp.perform {
-                                self.finish(operation, result: .success($0), progress: progress)
+            try await InstallTaskContext.$progress.withValue(progress) {
+                try await InstallTaskContext.$operationContext.withValue(context) {
+                    try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
+                        try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
+                            try await InstallTaskContext.$beginInstallationHandler.withValue(beginInstallationHandler) {
+                                do
+                                {
+                                    let installedApp = try await self.install(storeApp, preferredVersion: nil, presentingViewController: presentingViewController, operation: operation)
+                                    await installedApp.perform {
+                                        self.finish(operation, result: .success($0), progress: progress)
+                                    }
+                                    
+                                    return installedApp
+                                }
+                                catch
+                                {
+                                    self.finish(operation, result: .failure(error), progress: progress)
+                                    
+                                    throw error
+                                }
                             }
-                            
-                            return installedApp
-                        }
-                        catch
-                        {
-                            self.finish(operation, result: .failure(error), progress: progress)
-                            
-                            throw error
                         }
                     }
                 }
@@ -164,15 +169,16 @@ extension AppMarketplace
     
     func update(@AsyncManaged _ installedApp: InstalledApp, to version: AltStoreCore.AppVersion? = nil, presentingViewController: UIViewController?, beginInstallationHandler: ((String) -> Void)?) async -> (Task<AsyncManaged<InstalledApp>, Error>, Progress)
     {
+        let progress = Progress.discreteProgress(totalUnitCount: 100)
+        let context = OperationContext()
+        
         let (appName, bundleID) = await $installedApp.perform { ($0.name, $0.bundleIdentifier) }
         
         let (storeApp, latestSupportedVersion) = await $installedApp.perform({ ($0.storeApp, $0.storeApp?.latestSupportedVersion) })
         guard let storeApp, let appVersion = version ?? latestSupportedVersion else {
             let task = Task<AsyncManaged<InstalledApp>, Error> { throw OperationError.appNotFound(name: appName) }
-            return (task, Progress.discreteProgress(totalUnitCount: 1))
+            return (task, progress)
         }
-        
-        let progress = InstallTaskContext.progress
         
         let operation = AppManager.AppOperation.update(installedApp)
         AppManager.shared.set(progress, for: operation)
@@ -192,23 +198,27 @@ extension AppMarketplace
         }
                 
         let task = Task<AsyncManaged<InstalledApp>, Error>(priority: .userInitiated) {
-            try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
-                try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
-                    try await InstallTaskContext.$beginInstallationHandler.withValue(installationHandler) {
-                        do
-                        {
-                            let installedApp = try await self.install(storeApp, preferredVersion: appVersion, presentingViewController: presentingViewController, operation: operation)
-                            await installedApp.perform {
-                                self.finish(operation, result: .success($0), progress: progress)
+            try await InstallTaskContext.$progress.withValue(progress) {
+                try await InstallTaskContext.$operationContext.withValue(context) {
+                    try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
+                        try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
+                            try await InstallTaskContext.$beginInstallationHandler.withValue(installationHandler) {
+                                do
+                                {
+                                    let installedApp = try await self.install(storeApp, preferredVersion: appVersion, presentingViewController: presentingViewController, operation: operation)
+                                    await installedApp.perform {
+                                        self.finish(operation, result: .success($0), progress: progress)
+                                    }
+                                    
+                                    return installedApp
+                                }
+                                catch
+                                {
+                                    self.finish(operation, result: .failure(error), progress: progress)
+                                    
+                                    throw error
+                                }
                             }
-                            
-                            return installedApp
-                        }
-                        catch
-                        {
-                            self.finish(operation, result: .failure(error), progress: progress)
-                            
-                            throw error
                         }
                     }
                 }
