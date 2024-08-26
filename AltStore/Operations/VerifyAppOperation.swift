@@ -66,7 +66,7 @@ class VerifyAppOperation: ResultOperation<Void>
             Logger.sideload.notice("Verifying app \(self.context.bundleIdentifier, privacy: .public)...")
             
             guard app.bundleIdentifier == self.context.bundleIdentifier else {
-                throw VerificationError.mismatchedBundleIdentifiers(sourceBundleID: self.context.bundleIdentifier, app: app)
+                throw VerificationError.mismatchedBundleID(self.context.bundleIdentifier, expectedBundleID: app.bundleIdentifier, app: app)
             }
             
             guard ProcessInfo.processInfo.isOperatingSystemAtLeast(app.minimumiOSVersion) else {

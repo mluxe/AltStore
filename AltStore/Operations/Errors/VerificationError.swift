@@ -18,23 +18,31 @@ extension VerificationError
         // Legacy
         // case privateEntitlements = 0
         
-        case mismatchedBundleIdentifiers = 1
+        // 0xx = General
         case iOSVersionNotSupported = 2
         
-        case mismatchedHash = 3
-        case mismatchedVersion = 4
-        case mismatchedBuildVersion = 5
+        // 1xx = Mismatched values
+        case mismatchedBundleID = 101
+        case mismatchedMarketplaceID = 102
+        case mismatchedHash = 103
+        case mismatchedVersion = 104
+        case mismatchedBuildVersion = 105
         
-        case undeclaredPermissions = 6
-        case addedPermissions = 7
-    }
-    
-    static func mismatchedBundleIdentifiers(sourceBundleID: String, app: ALTApplication) -> VerificationError {
-        VerificationError(code: .mismatchedBundleIdentifiers, app: app, sourceBundleID: sourceBundleID)
+        // 2xx = Permissions
+        case undeclaredPermissions = 201
+        case addedPermissions = 202
     }
     
     static func iOSVersionNotSupported(app: AppProtocol, osVersion: OperatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersion, requiredOSVersion: OperatingSystemVersion?) -> VerificationError {
         VerificationError(code: .iOSVersionNotSupported, app: app, deviceOSVersion: osVersion, requiredOSVersion: requiredOSVersion)
+    }
+    
+    static func mismatchedBundleID(_ bundleID: String, expectedBundleID: String, app: AppProtocol) -> VerificationError {
+        VerificationError(code: .mismatchedBundleID, app: app, bundleID: bundleID, expectedBundleID: expectedBundleID)
+    }
+    
+    static func mismatchedMarketplaceID(_ marketplaceID: String, expectedMarketplaceID: String, app: AppProtocol) -> VerificationError {
+        VerificationError(code: .mismatchedMarketplaceID, app: app, marketplaceID: marketplaceID, expectedMarketplaceID: expectedMarketplaceID)
     }
     
     static func mismatchedHash(_ hash: String, expectedHash: String, app: AppProtocol) -> VerificationError {
@@ -66,9 +74,14 @@ struct VerificationError: ALTLocalizedError
     var errorFailure: String?
     
     @Managed var app: AppProtocol?
-    var sourceBundleID: String?
     var deviceOSVersion: OperatingSystemVersion?
     var requiredOSVersion: OperatingSystemVersion?
+    
+    @UserInfoValue var bundleID: String?
+    @UserInfoValue var expectedBundleID: String?
+    
+    @UserInfoValue var marketplaceID: String?
+    @UserInfoValue var expectedMarketplaceID: String?
     
     @UserInfoValue var hash: String?
     @UserInfoValue var expectedHash: String?
@@ -108,16 +121,6 @@ struct VerificationError: ALTLocalizedError
     var errorFailureReason: String {
         switch self.code
         {
-        case .mismatchedBundleIdentifiers:
-            if let appBundleID = self.$app.bundleIdentifier, let bundleID = self.sourceBundleID
-            {
-                return String(format: NSLocalizedString("The bundle ID “%@” does not match the one specified by the source (“%@”).", comment: ""), appBundleID, bundleID)
-            }
-            else
-            {
-                return NSLocalizedString("The bundle ID does not match the one specified by the source.", comment: "")
-            }
-            
         case .iOSVersionNotSupported:
             let appName = self.$app.name ?? NSLocalizedString("The app", comment: "")
             let deviceOSVersion = self.deviceOSVersion ?? ProcessInfo.processInfo.operatingSystemVersion
@@ -141,17 +144,25 @@ struct VerificationError: ALTLocalizedError
                 return failureReason
             }
             
+        case .mismatchedBundleID:
+            let appName = self.$app.name ?? NSLocalizedString("the app", comment: "")
+            return String(format: NSLocalizedString("The bundle ID for %@ does not match the one specified by the source.", comment: ""), appName)
+            
+        case .mismatchedMarketplaceID:
+            let appName = self.$app.name ?? NSLocalizedString("the app", comment: "")
+            return String(format: NSLocalizedString("The marketplace ID for %@ does not match the one specified by the source.", comment: ""), appName)
+            
         case .mismatchedHash:
             let appName = self.$app.name ?? NSLocalizedString("the downloaded app", comment: "")
             return String(format: NSLocalizedString("The SHA-256 hash of %@ does not match the hash specified by the source.", comment: ""), appName)
             
         case .mismatchedVersion:
             let appName = self.$app.name ?? NSLocalizedString("the app", comment: "")
-            return String(format: NSLocalizedString("The downloaded version of %@ does not match the version specified by the source.", comment: ""), appName)
+            return String(format: NSLocalizedString("The version of %@ does not match the version specified by the source.", comment: ""), appName)
             
         case .mismatchedBuildVersion:
             let appName = self.$app.name ?? NSLocalizedString("the app", comment: "")
-            return String(format: NSLocalizedString("The downloaded version of %@ does not match the build number specified by the source.", comment: ""), appName)
+            return String(format: NSLocalizedString("The build version of %@ does not match the build version specified by the source.", comment: ""), appName)
             
         case .undeclaredPermissions:
             let appName = self.$app.name ?? NSLocalizedString("The app", comment: "")

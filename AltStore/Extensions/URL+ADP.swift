@@ -16,7 +16,7 @@ extension URL
         // This technically breaks any URLs with '|' in them, but YOLO.
         let encodedADPLink = adpURL.absoluteString.replacingOccurrences(of: "/", with: "|")
         
-        var components = URLComponents(string: AppMarketplace.marketplaceDomain, encodingInvalidCharacters: true)!
+        var components = URLComponents(url: AppMarketplace.requestBaseURL, resolvingAgainstBaseURL: false)!
         components.path += "/install/" + encodedADPLink // Assigning path will implicitly percent-encode it
 
         let redirectURL = components.url

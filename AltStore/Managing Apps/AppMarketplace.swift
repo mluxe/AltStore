@@ -44,6 +44,14 @@ private extension AppMarketplace
     {
         var token: String
     }
+    
+    struct ADPManifest: Decodable
+    {
+        var appleItemId: String // marketplaceID
+        var bundleId: String
+        var shortVersionString: String
+        var bundleVersion: String
+    }
 }
 
 @available(iOS 17.4, *)
@@ -52,10 +60,12 @@ extension AppMarketplace
     static let defaultAccount = "AltStore"
     
     #if STAGING
-    static let marketplaceDomain = "https://dev.altstore.io"
+    private static let marketplaceDomain = "https://dev.altstore.io"
     #else
-    static let marketplaceDomain = "https://api.altstore.io"
+    private static let marketplaceDomain = "https://api.altstore.io"
     #endif
+    
+    static let requestBaseURL = URL(string: marketplaceDomain)!
 }
 
 @available(iOS 17.4, *)
@@ -286,6 +296,9 @@ private extension AppMarketplace
             appVersion = latestSupportedVersion
         }
         
+        // Verify hosted ADP matches source
+        try await self.verifyRemoteADP(for: appVersion)
+        
         // Install app
         let installedApp = try await self._install(appVersion, operation: operation)
         return installedApp
@@ -321,6 +334,37 @@ private extension AppMarketplace
         else if let maxOSVersion = appVersion.maxOSVersion, ProcessInfo.processInfo.operatingSystemVersion > maxOSVersion
         {
             throw VerificationError.iOSVersionNotSupported(app: appVersion, requiredOSVersion: maxOSVersion)
+        }
+    }
+    
+    func verifyRemoteADP(@AsyncManaged for appVersion: AltStoreCore.AppVersion) async throws
+    {
+        let (appName, bundleID, marketplaceID, buildVersion) = await $appVersion.perform {
+            ($0.storeApp?.name, $0.appBundleID, $0.storeApp?._marketplaceID, $0.buildVersion)
+        }
+        
+        guard let marketplaceID else { throw OperationError.unknownMarketplaceID(appName: appName ?? bundleID) }
+        
+        do
+        {
+            let adp = try await self.fetchADPManifest(for: appVersion)
+
+            guard bundleID == adp.bundleId else { throw VerificationError.mismatchedBundleID(bundleID, expectedBundleID: adp.bundleId, app: appVersion) }
+            guard marketplaceID == adp.appleItemId else { throw VerificationError.mismatchedMarketplaceID(marketplaceID, expectedMarketplaceID: adp.appleItemId, app: appVersion) }
+            
+            // Allow mismatched shortVersionString because the provided value may not match the Info.plist.
+            // guard version == adp.shortVersionString else { throw VerificationError.mismatchedVersion(version, expectedVersion: adp.shortVersionString, app: appVersion) }
+            
+            guard let buildVersion else { throw VerificationError.mismatchedBuildVersion("", expectedVersion: adp.bundleVersion, app: appVersion) }
+            guard buildVersion == adp.bundleVersion else { throw VerificationError.mismatchedBuildVersion(buildVersion, expectedVersion: adp.bundleVersion, app: appVersion) }
+        }
+        catch
+        {
+            let appName = appName ?? NSLocalizedString("App", comment: "")
+            let localizedTitle = String(format: NSLocalizedString("Failed to Verify %@", comment: ""), appName)
+            
+            let nsError = (error as NSError).withLocalizedTitle(localizedTitle)
+            throw nsError
         }
     }
     
@@ -628,7 +672,7 @@ extension AppMarketplace
 {
     func requestInstallToken(bundleID: String, isRedownload: Bool) async throws -> String
     {
-        let requestURL = URL(string: "https://8b7i0f8qea.execute-api.eu-central-1.amazonaws.com/install-token")!
+        let requestURL = AppMarketplace.requestBaseURL.appendingPathComponent("install-token")
         
         let payload = InstallVerificationTokenRequest(bundleID: bundleID, redownload: isRedownload)
         let bodyData = try JSONEncoder().encode(payload)
@@ -637,15 +681,31 @@ extension AppMarketplace
         request.httpMethod = "POST"
         request.httpBody = bodyData
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let response = try await self.send(request, expecting: InstallVerificationTokenResponse.self)
+        return response.token
+    }
+    
+    private func fetchADPManifest(@AsyncManaged for appVersion: AltStoreCore.AppVersion) async throws -> ADPManifest
+    {
+        let downloadURL = await $appVersion.downloadURL
+        let manifestURL = downloadURL.appending(path: "manifest.json")
         
-        let (data, response) = try await URLSession.shared.data(for: request)
-        if let httpResponse = response as? HTTPURLResponse
-        {
-            guard httpResponse.statusCode == 200 else { throw OperationError.unknown() } //TODO: Proper error
-        }
+        let request = URLRequest(url: manifestURL)
+        let adp = try await self.send(request, expecting: ADPManifest.self)
+        return adp
+    }
+    
+    private func send<T: Decodable>(_ request: URLRequest, expecting: T.Type) async throws -> T
+    {
+        let (data, urlResponse) = try await URLSession.shared.data(for: request)
+        guard let requestURL = request.url, let httpResponse = urlResponse as? HTTPURLResponse else { throw OperationError.unknown() }
         
-        let responseJSON = try Foundation.JSONDecoder().decode(InstallVerificationTokenResponse.self, from: data)
-        return responseJSON.token
+        guard httpResponse.statusCode == 200 else { throw URLError(.badServerResponse, userInfo: [NSURLErrorKey: requestURL, NSURLErrorFailingURLErrorKey: requestURL]) }
+        
+        let decoder = Foundation.JSONDecoder()
+        let response = try decoder.decode(T.self, from: data)
+        return response
     }
 }
 
