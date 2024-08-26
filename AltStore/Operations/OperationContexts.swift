@@ -13,12 +13,33 @@ import Network
 import AltStoreCore
 import AltSign
 
+import Roxas
+
 class OperationContext
 {
     var server: Server?
     var error: Error?
     
-    var presentingViewController: UIViewController?
+    var presentingViewController: UIViewController? {
+        get {
+            // Return first view controller that is non-nil, on-screen, AND is not currently being dismissed.
+            let viewController = [self.primaryViewController, self.secondaryViewController].compactMap { $0 }.first(where: { $0.isViewLoaded && $0.view.window != nil && !$0.isDisappearing })
+            return viewController
+        }
+        set {
+            self.primaryViewController = newValue
+            
+            if let newValue
+            {
+                rst_dispatch_sync_on_main_thread {
+                    self.secondaryViewController = newValue.presentingViewController
+                }
+            }
+        }
+    }
+    
+    private weak var primaryViewController: UIViewController?
+    private weak var secondaryViewController: UIViewController?
     
     let operations: NSHashTable<Foundation.Operation>
     

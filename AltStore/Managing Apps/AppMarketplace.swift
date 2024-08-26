@@ -30,8 +30,27 @@ private extension AppMarketplace
         @TaskLocal
         static var progress: Progress = Progress.discreteProgress(totalUnitCount: 0) // Default value is only created once, not per-task, so this is just a dummy Progress.
         
-        @TaskLocal
-        static var presentingViewController: UIViewController?
+        @MainActor
+        static var presentingViewController: UIViewController? {
+            return operationContext.presentingViewController
+        }
+        
+        static func withValues<T>(bundleID: String, progress: Progress, presentingViewController: UIViewController?, beginInstallationHandler: ((String) -> Void)?,
+                               operation: () async throws -> T) async rethrows -> T
+        {
+            let context = OperationContext()
+            context.presentingViewController = presentingViewController
+            
+            return try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
+                try await InstallTaskContext.$beginInstallationHandler.withValue(beginInstallationHandler) {
+                    try await InstallTaskContext.$operationContext.withValue(context) {
+                        try await InstallTaskContext.$progress.withValue(progress) {
+                            try await operation()
+                        }
+                    }
+                }
+            }
+        }
     }
     
     struct InstallVerificationTokenRequest: Encodable
@@ -139,7 +158,6 @@ extension AppMarketplace
     func install(@AsyncManaged _ storeApp: StoreApp, presentingViewController: UIViewController?, beginInstallationHandler: ((String) -> Void)?) async -> (Task<AsyncManaged<InstalledApp>, Error>, Progress)
     {
         let progress = Progress.discreteProgress(totalUnitCount: 100)
-        let context = OperationContext()
         
         let operation = AppManager.AppOperation.install(storeApp)
         AppManager.shared.set(progress, for: operation)
@@ -147,29 +165,21 @@ extension AppMarketplace
         let bundleID = await $storeApp.bundleIdentifier
         
         let task = Task<AsyncManaged<InstalledApp>, Error>(priority: .userInitiated) {
-            try await InstallTaskContext.$progress.withValue(progress) {
-                try await InstallTaskContext.$operationContext.withValue(context) {
-                    try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
-                        try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
-                            try await InstallTaskContext.$beginInstallationHandler.withValue(beginInstallationHandler) {
-                                do
-                                {
-                                    let installedApp = try await self.install(storeApp, preferredVersion: nil, presentingViewController: presentingViewController, operation: operation)
-                                    await installedApp.perform {
-                                        self.finish(operation, result: .success($0), progress: progress)
-                                    }
-                                    
-                                    return installedApp
-                                }
-                                catch
-                                {
-                                    self.finish(operation, result: .failure(error), progress: progress)
-                                    
-                                    throw error
-                                }
-                            }
-                        }
+            try await InstallTaskContext.withValues(bundleID: bundleID, progress: progress, presentingViewController: presentingViewController, beginInstallationHandler: beginInstallationHandler) {
+                do
+                {
+                    let installedApp = try await self.install(storeApp, preferredVersion: nil, presentingViewController: presentingViewController, operation: operation)
+                    await installedApp.perform {
+                        self.finish(operation, result: .success($0), progress: progress)
                     }
+                    
+                    return installedApp
+                }
+                catch
+                {
+                    self.finish(operation, result: .failure(error), progress: progress)
+                    
+                    throw error
                 }
             }
         }
@@ -180,7 +190,6 @@ extension AppMarketplace
     func update(@AsyncManaged _ installedApp: InstalledApp, to version: AltStoreCore.AppVersion? = nil, presentingViewController: UIViewController?, beginInstallationHandler: ((String) -> Void)?) async -> (Task<AsyncManaged<InstalledApp>, Error>, Progress)
     {
         let progress = Progress.discreteProgress(totalUnitCount: 100)
-        let context = OperationContext()
         
         let (appName, bundleID) = await $installedApp.perform { ($0.name, $0.bundleIdentifier) }
         
@@ -208,29 +217,21 @@ extension AppMarketplace
         }
                 
         let task = Task<AsyncManaged<InstalledApp>, Error>(priority: .userInitiated) {
-            try await InstallTaskContext.$progress.withValue(progress) {
-                try await InstallTaskContext.$operationContext.withValue(context) {
-                    try await InstallTaskContext.$presentingViewController.withValue(presentingViewController) {
-                        try await InstallTaskContext.$bundleIdentifier.withValue(bundleID) {
-                            try await InstallTaskContext.$beginInstallationHandler.withValue(installationHandler) {
-                                do
-                                {
-                                    let installedApp = try await self.install(storeApp, preferredVersion: appVersion, presentingViewController: presentingViewController, operation: operation)
-                                    await installedApp.perform {
-                                        self.finish(operation, result: .success($0), progress: progress)
-                                    }
-                                    
-                                    return installedApp
-                                }
-                                catch
-                                {
-                                    self.finish(operation, result: .failure(error), progress: progress)
-                                    
-                                    throw error
-                                }
-                            }
-                        }
+            try await InstallTaskContext.withValues(bundleID: bundleID, progress: progress, presentingViewController: presentingViewController, beginInstallationHandler: installationHandler) {
+                do
+                {
+                    let installedApp = try await self.install(storeApp, preferredVersion: appVersion, presentingViewController: presentingViewController, operation: operation)
+                    await installedApp.perform {
+                        self.finish(operation, result: .success($0), progress: progress)
                     }
+                    
+                    return installedApp
+                }
+                catch
+                {
+                    self.finish(operation, result: .failure(error), progress: progress)
+                    
+                    throw error
                 }
             }
         }
@@ -435,7 +436,10 @@ private extension AppMarketplace
         
         if let installMarketplaceAppViewController
         {
-            guard let presentingViewController = InstallTaskContext.presentingViewController else { throw OperationError.unknown(failureReason: NSLocalizedString("Could not determine presenting context.", comment: "")) }
+            // Retrieve InstallTaskContext.presentingViewController now because it will be nil in the DispatchQueue.main.async call.
+            guard let presentingViewController = await InstallTaskContext.presentingViewController else {
+                throw OperationError.unknown(failureReason: NSLocalizedString("Could not determine presenting context.", comment: ""))
+            }
             
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) -> Void in
                 DispatchQueue.main.async {
