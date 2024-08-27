@@ -410,7 +410,7 @@ private extension AppMarketplace
                 switch (bundleID, version)
                 {
                 // Ignore verification errors for grandfathered-in apps + versions.
-                case ("io.altstore.AltStore", "2.1.1"): break
+                case ("io.altstore.AltStore", "2.1.1"), ("io.altstore.AltStore", "2.1.2"): break
                 case ("com.rileytestut.Delta", "1.6.2"): break
                 case ("com.rileytestut.Delta.Beta", "1.6.2b"): break
                 case ("com.rileytestut.Clip", "1.1"): break
