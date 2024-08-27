@@ -13,6 +13,7 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
 {
     /* Properties */
     @NSManaged public var version: String
+    @NSManaged public var marketingVersion: String?
     
     // NULL does not work as expected with SQL Unique Constraints (because NULL != NULL),
     // so we store non-optional value and provide public accessor with optional return type.
@@ -60,6 +61,7 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
     {
         case version
         case buildVersion
+        case marketingVersion
         case date
         case localizedDescription
         case localizedDescriptions = "_localizedDescriptions"
@@ -82,6 +84,7 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
             
             self.version = try container.decode(String.self, forKey: .version)
             self.buildVersion = try container.decodeIfPresent(String.self, forKey: .buildVersion)
+            self.marketingVersion = try container.decodeIfPresent(String.self, forKey: .marketingVersion)
             
             self.date = try container.decode(Date.self, forKey: .date)
             
@@ -117,6 +120,11 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
 public extension AppVersion
 {
     var localizedVersion: String {
+        if let marketingVersion
+        {
+            return marketingVersion
+        }
+        
         guard let buildVersion else { return self.version }
         
         let localizedVersion = "\(self.version) (\(buildVersion))"

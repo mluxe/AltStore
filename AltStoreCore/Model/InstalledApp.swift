@@ -128,6 +128,12 @@ public extension InstalledApp
     var localizedVersion: String {
         guard let storeBuildVersion else { return self.version }
         
+        if let installedVersion = self.storeApp?._versions.lazy.compactMap({ $0 as? AltStoreCore.AppVersion }).first(where: { $0.version == self.version && $0.buildVersion == storeBuildVersion }),
+           let marketingVersion = installedVersion.marketingVersion
+        {
+            return marketingVersion
+        }
+        
         let localizedVersion = "\(self.version) (\(storeBuildVersion))"
         return localizedVersion
     }
