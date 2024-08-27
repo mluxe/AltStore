@@ -1583,6 +1583,9 @@ private extension MyAppsViewController
                         try await context.performAsync {
                             try context.save()
                         }
+                        
+                        // Also update installed apps as fallback.
+                        await AppMarketplace.shared.update()
                     }
                     catch let error as AppManager.FetchSourcesError
                     {

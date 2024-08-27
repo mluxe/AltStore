@@ -104,55 +104,100 @@ extension AppMarketplace
 {
     func update() async
     {
-        //FIXME: Uncomment once AppLibrary can reliably tell us whether app is installed or not.
-//        if !self.didUpdateInstalledApps
-//        {
-//            // Wait until the first observed change before we trust the returned value.
-//            await withCheckedContinuation { continuation in
-//                Task<Void, Never> { @MainActor in
-//                    _ = withObservationTracking {
-//                        AppLibrary.current.installedApps
-//                    } onChange: {
-//                        Task {
-//                            continuation.resume()
-//                        }
-//                    }
-//                }
-//            }
-//            
-//            self.didUpdateInstalledApps = true
-//        }
-//        
-//        let installedMarketplaceIDs = await Set(AppLibrary.current.installedApps.map(\.id))
-//        
-//        do
-//        {
-//            let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
-//            try await context.performAsync {
-//
-//                let installedApps = InstalledApp.all(in: context)
-//                for installedApp in installedApps where installedApp.bundleIdentifier != StoreApp.altstoreAppID
-//                {
-//                    // Ignore any installed apps without valid marketplace StoreApp.
-//                    guard let storeApp = installedApp.storeApp, let marketplaceID = storeApp.marketplaceID else { continue }
-//
-//                    // Ignore any apps we are actively installing.
-//                    guard !AppManager.shared.isActivelyManagingApp(withBundleID: installedApp.bundleIdentifier) else { continue }
-//
-//                    if !installedMarketplaceIDs.contains(marketplaceID)
-//                    {
-//                        // This app is no longer installed, so delete.
-//                        context.delete(installedApp)
-//                    }
-//                }
-//
-//                try context.save()
-//            }
-//        }
-//        catch
-//        {
-//            Logger.main.error("Failed to update installed apps. \(error.localizedDescription, privacy: .public)")
-//        }
+        guard UserDefaults.shared.shouldManageInstalledApps else { return }
+        
+        if !self.didUpdateInstalledApps
+        {
+            // Wait until the first observed change before we trust the returned value.
+            await withCheckedContinuation { continuation in
+                Task<Void, Never> { @MainActor in
+                    _ = withObservationTracking {
+                        AppLibrary.current.installedApps
+                    } onChange: {
+                        Task {
+                            continuation.resume()
+                        }
+                    }
+                }
+            }
+            
+            self.didUpdateInstalledApps = true
+        }
+        
+        let installedMarketplaceApps = await AppLibrary.current.installedApps
+        let installedMarketplaceAppsAndMetadata = await MainActor.run { installedMarketplaceApps.map { ($0, $0.installedMetadata) } }
+        
+        let installedMarketplaceIDs = Set(installedMarketplaceApps.map(\.id))
+        Logger.main.debug("Installed Apps: \(installedMarketplaceIDs)")
+        
+        do
+        {
+            let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+            try await context.performAsync {
+                
+                let installedApps = InstalledApp.all(in: context)
+                let installedAppsByMarketplaceID = installedApps.filter { $0.storeApp?.marketplaceID != nil }
+                    .reduce(into: [UInt64: InstalledApp]()) {
+                        $0[$1.storeApp!.marketplaceID!] = $1
+                    }
+                
+                // Remove uninstalled apps
+                for installedApp in installedApps where installedApp.bundleIdentifier != StoreApp.altstoreAppID
+                {
+                    // Ignore any installed apps without valid marketplace StoreApp.
+                    guard let storeApp = installedApp.storeApp, let marketplaceID = storeApp.marketplaceID else { continue }
+
+                    // Ignore any apps we are actively installing.
+                    guard !AppManager.shared.isActivelyManagingApp(withBundleID: installedApp.bundleIdentifier) else { continue }
+
+                    if !installedMarketplaceIDs.contains(marketplaceID)
+                    {
+                        // This app is no longer installed, so delete.
+                        Logger.main.info("Removing uninstalled app \(installedApp.bundleIdentifier)")
+                        context.delete(installedApp)
+                    }
+                }
+                
+                // Add missing installed apps (e.g. ones that finished installing after AltStore quit).
+                for (marketplaceApp, installedMetadata) in installedMarketplaceAppsAndMetadata where marketplaceApp.id != StoreApp.altstoreMarketplaceID
+                {
+                    // Ignore any marketplaceIDs that match an installed app.
+                    guard !installedAppsByMarketplaceID.keys.contains(marketplaceApp.id) else { continue }
+                    
+                    // Ignore any marketplaceIDs that don't map to a StoreApp.
+                    //TODO: Should we make these placeholders?
+                    let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp._marketplaceID), String(marketplaceApp.id))
+                    guard let storeApp = StoreApp.first(satisfying: predicate, in: context) else { continue }
+                    
+                    let appVersion: AltStoreCore.AppVersion?
+                    
+                    if let installedMetadata
+                    {
+                        let version = storeApp.versions.first { $0.version == installedMetadata.shortVersion && $0.buildVersion == installedMetadata.version }
+                        
+                        // Fall back to latest supported version if no exact match.
+                        appVersion = version ?? storeApp.latestSupportedVersion
+                    }
+                    else
+                    {
+                        // Fall back to latest supported version if no exact match.
+                        appVersion = storeApp.latestSupportedVersion
+                    }
+                    
+                    if let appVersion
+                    {
+                        let installedApp = self.makeInstalledApp(for: storeApp, appVersion: appVersion, in: context)
+                        Logger.main.info("Adding installed app \(installedApp.bundleIdentifier)")
+                    }
+                }
+
+                try context.save()
+            }
+        }
+        catch
+        {
+            Logger.main.error("Failed to update installed apps. \(error.localizedDescription, privacy: .public)")
+        }
     }
     
     func install(@AsyncManaged _ storeApp: StoreApp, presentingViewController: UIViewController?, beginInstallationHandler: ((String) -> Void)?) async -> (Task<AsyncManaged<InstalledApp>, Error>, Progress)
@@ -537,13 +582,15 @@ private extension AppMarketplace
                     }
                 }
                 
-                //FIXME: Uncomment this when AppLibrary bugs are fixed.
-                // let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
-                // if !didInstallSuccessfully
-                // {
-                //     // App version does not match the version we attempted to install, so assume error occured.
-                //     throw CancellationError()
-                // }
+                if UserDefaults.shared.shouldManageInstalledApps
+                {
+                    let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
+                    if !didInstallSuccessfully
+                    {
+                        // App version does not match the version we attempted to install, so assume error occured.
+                        throw CancellationError()
+                    }
+                }
                 
                 // App version matches version we're installing, so break loop.
                 Logger.sideload.info("Finished installing marketplace app \(bundleID, privacy: .public)")
@@ -559,7 +606,7 @@ private extension AppMarketplace
                 {
                     // App version is not installed...supposedly.
                     
-                    if !isInstalled
+                    if !isInstalled && !UserDefaults.shared.shouldManageInstalledApps
                     {
                         // App itself apparently isn't installed, but check if we can open URL as fallback.
                         
@@ -605,27 +652,34 @@ private extension AppMarketplace
             let storeApp = backgroundContext.object(with: storeApp.objectID) as! StoreApp
             let appVersion = backgroundContext.object(with: appVersion.objectID) as! AltStoreCore.AppVersion
             
-            /* App */
-            let installedApp: InstalledApp
-            
-            // Fetch + update rather than insert + resolve merge conflicts to prevent potential context-level conflicts.
-            if let app = InstalledApp.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), bundleID), in: backgroundContext)
-            {
-                installedApp = app
-            }
-            else
-            {
-                installedApp = InstalledApp(marketplaceApp: storeApp, context: backgroundContext)
-            }
-            
-            installedApp.update(forMarketplaceAppVersion: appVersion)
-            
-            //TODO: Include app extensions?
-            
+            let installedApp = self.makeInstalledApp(for: storeApp, appVersion: appVersion, in: backgroundContext)
             return installedApp
         }
         
         return AsyncManaged(wrappedValue: installedApp)
+    }
+    
+    func makeInstalledApp(for storeApp: StoreApp, appVersion: AltStoreCore.AppVersion, in context: NSManagedObjectContext) -> InstalledApp
+    {
+        /* App */
+        let installedApp: InstalledApp
+        
+        // Fetch + update rather than insert + resolve merge conflicts to prevent potential context-level conflicts.
+        let predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), storeApp.bundleIdentifier)
+        if let app = InstalledApp.first(satisfying: predicate, in: context)
+        {
+            installedApp = app
+        }
+        else
+        {
+            installedApp = InstalledApp(marketplaceApp: storeApp, context: context)
+        }
+        
+        installedApp.update(forMarketplaceAppVersion: appVersion)
+        
+        //TODO: Include app extensions?
+        
+        return installedApp
     }
     
     func isAppVersionInstalled(@AsyncManaged _ appVersion: AltStoreCore.AppVersion, @AsyncManaged for storeApp: StoreApp) async throws -> Bool
@@ -645,8 +699,7 @@ private extension AppMarketplace
         {
             // Verify installed metadata matches expected version.
 
-            let (version, buildVersion, localizedVersion) = await $appVersion.perform { ($0.version, $0.buildVersion, $0.localizedVersion) }
-            
+            let (version, buildVersion) = await $appVersion.perform { ($0.version, $0.buildVersion) }
             if version == installedMetadata.shortVersion && buildVersion == installedMetadata.version
             {
                 // Installed version matches storeApp version.
@@ -655,7 +708,7 @@ private extension AppMarketplace
             else
             {
                 // Installed version does NOT match the version we're installing.
-                Logger.sideload.info("App \(bundleID, privacy: .public) is installed, but does not match the version we're expecting. Expected: \(localizedVersion). Actual: \(installedMetadata.shortVersion) (\(installedMetadata.version))")
+                Logger.sideload.info("App \(bundleID, privacy: .public) is installed, but does not match the version we're expecting. Expected: \(version) (\(buildVersion ?? "")). Actual: \(installedMetadata.shortVersion) (\(installedMetadata.version))")
                 return false
             }
         }

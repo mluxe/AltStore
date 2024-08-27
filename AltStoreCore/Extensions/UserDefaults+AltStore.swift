@@ -77,6 +77,7 @@ public extension UserDefaults
     
     @NSManaged var permissionCheckingDisabled: Bool
     @NSManaged var responseCachingDisabled: Bool
+    @NSManaged var shouldManageInstalledApps: Bool
     
     class func registerDefaults()
     {
@@ -95,6 +96,12 @@ public extension UserDefaults
         let isMacDirtyCowSupported =
         (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios14) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios15_7_2)) ||
         (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16_2))
+        
+        #if MARKETPLACE
+        let shouldManageInstalledApps = false
+        #else
+        let shouldManageInstalledApps = false
+        #endif
         
         #if DEBUG
         let permissionCheckingDisabled = true
@@ -116,6 +123,7 @@ public extension UserDefaults
             #keyPath(UserDefaults.isCowExploitSupported): isMacDirtyCowSupported,
             #keyPath(UserDefaults.permissionCheckingDisabled): permissionCheckingDisabled,
             #keyPath(UserDefaults._preferredAppSorting): preferredAppSorting.rawValue,
+            #keyPath(UserDefaults.shouldManageInstalledApps): shouldManageInstalledApps,
         ] as [String: Any]
         
         #if MARKETPLACE
