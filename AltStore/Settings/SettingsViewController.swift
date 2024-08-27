@@ -154,6 +154,9 @@ class SettingsViewController: UITableViewController
             {
                 appearance.stackedLayoutAppearance.normal.badgeBackgroundColor = .altPrimary
                 self.navigationController?.tabBarItem.scrollEdgeAppearance = appearance
+                
+                // As of iOS 18.0 we also need to manually reset the tab bar's scrollEdgeAppearance to apply changes.
+                self.tabBarController?.tabBar.scrollEdgeAppearance = nil
             }
             
             // We can only configure the contentMode for a button's background image from Interface Builder.
