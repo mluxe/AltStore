@@ -385,8 +385,8 @@ private extension AppMarketplace
     
     func verifyRemoteADP(@AsyncManaged for appVersion: AltStoreCore.AppVersion) async throws
     {
-        let (appName, bundleID, marketplaceID, buildVersion) = await $appVersion.perform {
-            ($0.storeApp?.name, $0.appBundleID, $0.storeApp?._marketplaceID, $0.buildVersion)
+        let (appName, bundleID, marketplaceID, version, buildVersion) = await $appVersion.perform {
+            ($0.storeApp?.name, $0.appBundleID, $0.storeApp?._marketplaceID, $0.version, $0.buildVersion)
         }
         
         guard let marketplaceID else { throw OperationError.unknownMarketplaceID(appName: appName ?? bundleID) }
@@ -395,14 +395,32 @@ private extension AppMarketplace
         {
             let adp = try await self.fetchADPManifest(for: appVersion)
 
-            guard bundleID == adp.bundleId else { throw VerificationError.mismatchedBundleID(bundleID, expectedBundleID: adp.bundleId, app: appVersion) }
-            guard marketplaceID == adp.appleItemId else { throw VerificationError.mismatchedMarketplaceID(marketplaceID, expectedMarketplaceID: adp.appleItemId, app: appVersion) }
-            
-            // Allow mismatched shortVersionString because the provided value may not match the Info.plist.
-            // guard version == adp.shortVersionString else { throw VerificationError.mismatchedVersion(version, expectedVersion: adp.shortVersionString, app: appVersion) }
-            
-            guard let buildVersion else { throw VerificationError.mismatchedBuildVersion("", expectedVersion: adp.bundleVersion, app: appVersion) }
-            guard buildVersion == adp.bundleVersion else { throw VerificationError.mismatchedBuildVersion(buildVersion, expectedVersion: adp.bundleVersion, app: appVersion) }
+            do
+            {
+                guard bundleID == adp.bundleId else { throw VerificationError.mismatchedBundleID(bundleID, expectedBundleID: adp.bundleId, app: appVersion) }
+                guard marketplaceID == adp.appleItemId else { throw VerificationError.mismatchedMarketplaceID(marketplaceID, expectedMarketplaceID: adp.appleItemId, app: appVersion) }
+                
+                guard version == adp.shortVersionString else { throw VerificationError.mismatchedVersion(version, expectedVersion: adp.shortVersionString, app: appVersion) }
+                
+                guard let buildVersion else { throw VerificationError.mismatchedBuildVersion("", expectedVersion: adp.bundleVersion, app: appVersion) }
+                guard buildVersion == adp.bundleVersion else { throw VerificationError.mismatchedBuildVersion(buildVersion, expectedVersion: adp.bundleVersion, app: appVersion) }
+            }
+            catch let error as VerificationError
+            {
+                switch (bundleID, version)
+                {
+                // Ignore verification errors for grandfathered-in apps + versions.
+                case ("io.altstore.AltStore", "2.1.1"): break
+                case ("com.rileytestut.Delta", "1.6.2"): break
+                case ("com.rileytestut.Delta.Beta", "1.6.2b"): break
+                case ("com.rileytestut.Clip", "1.1"): break
+                case ("com.rileytestut.Clip.Beta", "1.2b"): break
+                case ("MikeMichael225.qBitControl", "1.2"): break
+                
+                // Throw error for all other apps/versions.
+                default: throw error
+                }
+            }
         }
         catch
         {
