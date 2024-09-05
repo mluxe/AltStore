@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import MarketplaceKit
 
 import AltStoreCore
 import Roxas
@@ -75,18 +74,6 @@ class AppBannerView: RSTNibView
     var style: Style = .app
     
     private var originalTintColor: UIColor?
-    private var previousAppAction: AppAction?
-    
-    @available(iOS 17.4, *)
-    private var actionButton: ActionButton? {
-        get { _actionButton as? ActionButton }
-        set { _actionButton = newValue }
-    }
-    private var _actionButton: UIControl?
-    
-    private var actionButtonContainerView: UIView!
-    
-    var actionButtonCallback: ((AsyncManaged<StoreApp>, AsyncManaged<AltStoreCore.AppVersion>) -> Void)?
     
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var subtitleLabel: UILabel!
@@ -135,18 +122,6 @@ class AppBannerView: RSTNibView
         
         self.stackView.isLayoutMarginsRelativeArrangement = true
         self.stackView.preservesSuperviewLayoutMargins = true
-        
-        self.actionButtonContainerView = UIView()
-        self.actionButtonContainerView.translatesAutoresizingMaskIntoConstraints = false
-        self.actionButtonContainerView.backgroundColor = .blue
-//        self.addSubview(self.actionButtonContainerView)
-        
-//        NSLayoutConstraint.activate([
-//            self.actionButtonContainerView.leadingAnchor.constraint(equalTo: self.button.leadingAnchor),
-//            self.actionButtonContainerView.trailingAnchor.constraint(equalTo: self.button.trailingAnchor),
-//            self.actionButtonContainerView.topAnchor.constraint(equalTo: self.button.topAnchor),
-//            self.actionButtonContainerView.bottomAnchor.constraint(equalTo: self.button.bottomAnchor),
-//        ])
     }
     
     override func tintColorDidChange()
@@ -159,14 +134,6 @@ class AppBannerView: RSTNibView
         }
         
         self.update()
-    }
-    
-    override func layoutSubviews() 
-    {
-        super.layoutSubviews()
-        
-//        self.actionButton?.size = self.actionButtonContainerView.bounds.size
-//        self.actionButton?.center = CGPoint(x: self.actionButtonContainerView.bounds.midX, y: self.actionButtonContainerView.bounds.midY)
     }
 }
 
@@ -478,11 +445,5 @@ private extension AppBannerView
                 self.vibrancyView.effect = textVibrancyEffect
             }
         }
-    }
-    
-    @available(iOS 17.4, *)
-    @objc func performMarketplaceAction(_ sender: ActionButton)
-    {
-        //self.button.sendActions(for: .primaryActionTriggered)
     }
 }
