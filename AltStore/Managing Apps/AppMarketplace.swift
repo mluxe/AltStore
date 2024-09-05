@@ -447,7 +447,7 @@ private extension AppMarketplace
             throw await OperationError.unknownMarketplaceID(appName: $storeApp.name)
         }
         
-        // Can't rely on localApp.isInstalled to be accurate... FB://feedback-placeholder
+        // Can't rely on localApp.isInstalled to be accurate... FB://FB14080494
         // let isInstalled = await localApp.isInstalled
         // let localApp = await AppLibrary.current.app(forAppleItemID: marketplaceID)
         
@@ -650,7 +650,7 @@ private extension AppMarketplace
                 
                 if !didAddChildProgress
                 {
-                    // Make sure we set manually set progress as completed.
+                    // Make sure we manually set progress as completed.
                     Logger.sideload.info("Manually updated progress for app \(bundleID, privacy: .public) to \(InstallTaskContext.progress.fractionCompleted) (\(InstallTaskContext.progress.completedUnitCount) of \(InstallTaskContext.progress.totalUnitCount))")
                     InstallTaskContext.progress.completedUnitCount = InstallTaskContext.progress.totalUnitCount
                 }
