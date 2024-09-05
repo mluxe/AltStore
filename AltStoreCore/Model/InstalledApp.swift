@@ -51,8 +51,7 @@ public class InstalledApp: NSManagedObject, InstalledAppProtocol
     @NSManaged public var version: String
     @NSManaged public var buildVersion: String
     
-    //TODO: Make refreshedDate and expirationDate optional?
-    // TODO: Make modifiedDate?
+    //TODO: Add separate modifiedDate? Or re-purpose refreshedDate for MARKETPLACE builds?
     @NSManaged public var refreshedDate: Date
     @NSManaged public var expirationDate: Date
     @NSManaged public var installedDate: Date

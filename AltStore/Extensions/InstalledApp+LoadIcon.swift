@@ -20,8 +20,7 @@ extension InstalledApp
         //TODO: Handle apps without sources/storeApps
         
         guard let storeApp = self.storeApp else {
-            //TODO: Replace with better error
-            return completion(.failure(CocoaError(.fileNoSuchFile)))
+            return completion(.failure(OperationError.appNotFound(name: self.name)))
         }
         
         ImagePipeline.shared.loadImage(with: storeApp.iconURL, progress: nil) { result in

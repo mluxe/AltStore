@@ -475,7 +475,7 @@ extension AppManager
         
         #if MARKETPLACE
         
-        guard #available(iOS 17.4, *) else { fatalError() } //TODO: Remove?
+        guard #available(iOS 17.4, *) else { fatalError("MARKETPLACE builds don't support iOS versions prior to 17.4") }
         
         let (task, progress) = await AppMarketplace.shared.install(storeApp, presentingViewController: presentingViewController, beginInstallationHandler: nil)
         return (task, progress)
@@ -511,7 +511,7 @@ extension AppManager
     {
         #if MARKETPLACE
         
-        guard #available(iOS 17.4, *) else { fatalError() } //TODO: Remove
+        guard #available(iOS 17.4, *) else { fatalError("MARKETPLACE builds don't support iOS versions prior to 17.4") }
 
         let task = await AppMarketplace.shared.update(installedApp, to: version, presentingViewController: presentingViewController, beginInstallationHandler: nil)
         return task
