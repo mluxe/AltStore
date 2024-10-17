@@ -463,7 +463,11 @@ internal extension StoreApp
         self._versionDate = latestVersion.date
         self._versionDescription = latestVersion.localizedDescription
         self._downloadURL = latestVersion.downloadURL
-        self._size = Int32(latestVersion.size)
+        
+        // Use Int32(exactly:) initializer to avoid crash when size is larger than 2GB.
+        // This is purely for backwards compatibility, so just fall back to 0 if size is too large.
+        let size = Int32(exactly: NSNumber(value: latestVersion.size))
+        self._size = size ?? 0
     }
     
     func setPermissions(_ permissions: Set<AppPermission>)
