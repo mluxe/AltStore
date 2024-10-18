@@ -28,8 +28,8 @@ private extension AppMarketplace
         @TaskLocal
         static var operationContext: OperationContext = OperationContext()
         
-        @TaskLocal
-        static var progress: Progress = Progress.discreteProgress(totalUnitCount: 0) // Default value is only created once, not per-task, so this is just a dummy Progress.
+        @TaskLocal // Default value is only created once, not per-task, so this is just a dummy Progress.
+        static var progress: Progress = Progress.discreteProgress(totalUnitCount: 0)
         
         @MainActor
         static var presentingViewController: UIViewController? {
