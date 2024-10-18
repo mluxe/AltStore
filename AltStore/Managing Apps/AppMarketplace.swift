@@ -8,6 +8,7 @@
 
 import MarketplaceKit
 import CoreData
+import Security
 
 import AltStoreCore
 
@@ -71,6 +72,17 @@ private extension AppMarketplace
         var shortVersionString: String
         var bundleVersion: String
     }
+    
+    struct PALPromoRequest: Encodable
+    {
+        var session: String
+        var email: String
+    }
+    
+    struct PALPromoResponse: Decodable
+    {
+        var promoExpiration: Date
+    }
 }
 
 @available(iOS 17.4, *)
@@ -88,14 +100,29 @@ extension AppMarketplace
 }
 
 @available(iOS 17.4, *)
-actor AppMarketplace
+actor AppMarketplace: NSObject
 {
     static let shared = AppMarketplace()
     
+    private let pinnedCertificates: [SecCertificate]
+    
     private var didUpdateInstalledApps = false
     
-    private init()
+    private override init()
     {
+        do
+        {
+            let certificateURL = Bundle.main.url(forResource: "AltMarketplace", withExtension: "cer")!
+            let certificateData = try Data(contentsOf: certificateURL)
+                        
+            guard let certificate = SecCertificateCreateWithData(nil, certificateData as CFData) else { throw CocoaError(.fileReadCorruptFile, userInfo: [NSURLErrorKey: certificateURL]) }
+            self.pinnedCertificates = [certificate]
+        }
+        catch
+        {
+            Logger.main.error("Failed to configure pinned certificates. \(error.localizedDescription, privacy: .public)")
+            self.pinnedCertificates = []
+        }
     }
 }
 
@@ -745,6 +772,28 @@ private extension AppMarketplace
 @available(iOS 17.4, *)
 extension AppMarketplace
 {
+    func redeemPALPromo(session: String, emailAddress: String) async throws
+    {
+        let requestURL = AppMarketplace.requestBaseURL.appendingPathComponent("pal-promo")
+        
+        let payload = PALPromoRequest(session: session, email: emailAddress)
+        let bodyData = try JSONEncoder().encode(payload)
+        
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "POST"
+        request.httpBody = bodyData
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let response = try await self.send(request, pinCertificates: true, expecting: PALPromoResponse.self)
+        
+        Keychain.shared.stripeEmailAddress = emailAddress
+        Keychain.shared.palPromoExpiration = response.promoExpiration
+    }
+}
+
+@available(iOS 17.4, *)
+extension AppMarketplace
+{
     func requestInstallToken(bundleID: String, isRedownload: Bool) async throws -> String
     {
         let requestURL = AppMarketplace.requestBaseURL.appendingPathComponent("install-token")
@@ -771,14 +820,18 @@ extension AppMarketplace
         return adp
     }
     
-    private func send<T: Decodable>(_ request: URLRequest, expecting: T.Type) async throws -> T
+    private func send<T: Decodable>(_ request: URLRequest, pinCertificates: Bool = false, expecting: T.Type) async throws -> T
     {
-        let (data, urlResponse) = try await URLSession.shared.data(for: request)
+        let session = pinCertificates ? URLSession(configuration: .default, delegate: self, delegateQueue: nil) : URLSession.shared
+        
+        let (data, urlResponse) = try await session.data(for: request)
         guard let requestURL = request.url, let httpResponse = urlResponse as? HTTPURLResponse else { throw OperationError.unknown() }
         
         guard httpResponse.statusCode == 200 else { throw URLError(.badServerResponse, userInfo: [NSURLErrorKey: requestURL, NSURLErrorFailingURLErrorKey: requestURL]) }
         
         let decoder = Foundation.JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        
         let response = try decoder.decode(T.self, from: data)
         return response
     }
@@ -868,5 +921,26 @@ private extension AppMarketplace
             let error = nsError.withLocalizedTitle(localizedTitle)
             AppManager.shared.log(error, operation: operation.loggedErrorOperation, app: operation.app)
         }
+    }
+}
+
+@available(iOS 17.4, *)
+extension AppMarketplace: URLSessionDelegate
+{
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?)
+    {
+        guard 
+            let trust = challenge.protectionSpace.serverTrust,
+            let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate],
+            let certificate = certificates.first
+        else { return (.cancelAuthenticationChallenge, nil) }
+        
+        // Ensure certificate is a known pinned certificate.
+        guard self.pinnedCertificates.contains(certificate) else {
+            Logger.main.error("Attempting server connection with unknown certificate, rejecting challenge.")
+            return (.cancelAuthenticationChallenge, nil)
+        }
+        
+        return (.useCredential, URLCredential(trust: trust))
     }
 }

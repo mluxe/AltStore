@@ -407,6 +407,7 @@
 		D5753A622B279F1900090456 /* AltStore14ToAltStore15.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = D5753A612B279F1900090456 /* AltStore14ToAltStore15.xcmappingmodel */; };
 		D577AB7B2A967DF5007FE952 /* AppsTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D577AB7A2A967DF5007FE952 /* AppsTimelineProvider.swift */; };
 		D577AB7F2A96878A007FE952 /* AppDetailWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D577AB7E2A96878A007FE952 /* AppDetailWidget.swift */; };
+		D5784E3F2CC2E67B00DAC00E /* AltMarketplace.cer in Resources */ = {isa = PBXBuildFile; fileRef = D5784E3E2CC2E67B00DAC00E /* AltMarketplace.cer */; };
 		D57968CB29CB99EF00539069 /* VibrantButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D57968CA29CB99EF00539069 /* VibrantButton.swift */; };
 		D57DF638271E32F000677701 /* PatchApp.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D57DF637271E32F000677701 /* PatchApp.storyboard */; };
 		D57DF63F271E51E400677701 /* ALTAppPatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = D57DF63E271E51E400677701 /* ALTAppPatcher.m */; };
@@ -1085,6 +1086,7 @@
 		D5753A612B279F1900090456 /* AltStore14ToAltStore15.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = AltStore14ToAltStore15.xcmappingmodel; sourceTree = "<group>"; };
 		D577AB7A2A967DF5007FE952 /* AppsTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppsTimelineProvider.swift; sourceTree = "<group>"; };
 		D577AB7E2A96878A007FE952 /* AppDetailWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDetailWidget.swift; sourceTree = "<group>"; };
+		D5784E3E2CC2E67B00DAC00E /* AltMarketplace.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AltMarketplace.cer; sourceTree = "<group>"; };
 		D57968CA29CB99EF00539069 /* VibrantButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibrantButton.swift; sourceTree = "<group>"; };
 		D57DF637271E32F000677701 /* PatchApp.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = PatchApp.storyboard; sourceTree = "<group>"; };
 		D57DF63D271E51E400677701 /* ALTAppPatcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ALTAppPatcher.h; sourceTree = "<group>"; };
@@ -2038,6 +2040,7 @@
 				D56D21412B7D9C41007641C5 /* AltIcons.plist */,
 				BF770E6822BD57DD002A40FE /* Silence.m4a */,
 				D50F7FF02C5BFEE70064F7CE /* PrivacyInfo.xcprivacy */,
+				D5784E3E2CC2E67B00DAC00E /* AltMarketplace.cer */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -2934,6 +2937,7 @@
 				BF770E6922BD57DD002A40FE /* Silence.m4a in Resources */,
 				D55D3EBD2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard in Resources */,
 				BFD247772284B9A700981D42 /* Assets.xcassets in Resources */,
+				D5784E3F2CC2E67B00DAC00E /* AltMarketplace.cer in Resources */,
 				BFF0B6922321A305007A79E1 /* AboutPatreonHeaderView.xib in Resources */,
 				BFB6B22423187A3D0022A802 /* NewsCollectionViewCell.xib in Resources */,
 				D50F7FF12C5BFEE70064F7CE /* PrivacyInfo.xcprivacy in Resources */,

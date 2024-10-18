@@ -160,7 +160,55 @@ private extension SceneDelegate
                     NotificationCenter.default.post(name: AppDelegate.viewAppDeepLinkNotification, object: nil, userInfo: [AppDelegate.viewAppDeepLinkStoreAppKey: storeApp])
                 }
                 
+            case "pal-promo":
+                let queryItems = components.queryItems?.reduce(into: [String: String]()) { $0[$1.name.lowercased()] = $1.value } ?? [:]
+                guard let session = queryItems["session"], let emailAddress = queryItems["email"] else { return }
+                
+                self.redeemPALPromo(session: session, emailAddress: emailAddress)
+                
             default: break
+            }
+        }
+    }
+
+    func redeemPALPromo(session: String, emailAddress: String)
+    {
+        Task<Void, Never> {
+            guard var rootViewController = self.window?.rootViewController else { return }
+            while let presentedViewController = rootViewController.presentedViewController
+            {
+                rootViewController = presentedViewController
+            }
+            
+            do
+            {
+                try await AppMarketplace.shared.redeemPALPromo(session: session, emailAddress: emailAddress)
+                
+                let alertController = UIAlertController(title: NSLocalizedString("Redeemed PAL Promo", comment: ""), message: NSLocalizedString("You've received 1 month of free access to our “Early Adopter” Patreon tier!\n\nMake sure you have joined our Patreon campaign as a free member and connected your Patreon account in Settings.", comment: ""), preferredStyle: .alert)
+                alertController.addAction(UIAlertAction(title: UIAlertAction.ok.title, style: .cancel)) // Cancel style to place it below Connect Account button.
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Connect Patreon Account", comment: ""), style: .default) { _ in
+                    NotificationCenter.default.post(name: AppDelegate.openPatreonSettingsDeepLinkNotification, object: nil)
+                })
+                rootViewController.present(alertController, animated: true)
+                
+                AppManager.shared.updateAllSources { result in
+                    switch result
+                    {
+                    case .success: break
+                    case .failure(let error): Logger.main.error("Failed to update sources after redeeming PAL promo. \(error.localizedDescription, privacy: .public)")
+                    }
+                }
+            }
+            catch
+            {
+                #if DEBUG
+                Keychain.shared.stripeEmailAddress = nil
+                Keychain.shared.palPromoExpiration = nil
+                #endif
+                
+                let alertController = UIAlertController(title: NSLocalizedString("Unable to Redeem PAL Promo", comment: ""), message: error.localizedDescription, preferredStyle: .alert)
+                alertController.addAction(.ok)
+                rootViewController.present(alertController, animated: true)
             }
         }
     }

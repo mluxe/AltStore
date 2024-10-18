@@ -24,6 +24,12 @@ public struct KeychainItem<Value>
             {
             case is Data.Type: return try? Keychain.shared.keychain.getData(self.key) as? Value
             case is String.Type: return try? Keychain.shared.keychain.getString(self.key) as? Value
+            case is Date.Type:
+                guard #available(iOS 15, *), let dateString = try? Keychain.shared.keychain.getString(self.key) else { return nil }
+                
+                let date = try? Date(dateString, strategy: .iso8601)
+                return date as? Value
+                
             default: return nil
             }
         }
@@ -32,6 +38,12 @@ public struct KeychainItem<Value>
             {
             case is Data.Type: Keychain.shared.keychain[data: self.key] = newValue as? Data
             case is String.Type: Keychain.shared.keychain[self.key] = newValue as? String
+            case is Date.Type:
+                guard #available(iOS 15, *) else { break }
+                        
+                let date = newValue as? Date
+                Keychain.shared.keychain[self.key] = date?.formatted(.iso8601)
+                
             default: break
             }
         }
@@ -83,6 +95,12 @@ public class Keychain
     @KeychainItem(key: "patreonAccountID")
     public var patreonAccountID: String?
     
+    @KeychainItem(key: "stripeEmailAddress")
+    public var stripeEmailAddress: String?
+    
+    @KeychainItem(key: "palPromoExpiration")
+    public var palPromoExpiration: Date?
+    
     private init()
     {
     }
@@ -93,5 +111,8 @@ public class Keychain
         self.appleIDPassword = nil
         self.signingCertificatePrivateKey = nil
         self.signingCertificateSerialNumber = nil
+        
+        self.stripeEmailAddress = nil
+        self.palPromoExpiration = nil
     }
 }
