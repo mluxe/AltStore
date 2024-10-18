@@ -270,6 +270,18 @@ private extension FetchSourceOperation
         // We only assign `isPledged = true` because false is already the default,
         // and only one check needs to be true for isPledged to be true.
         
+        if normalizedPatreonURL == "patreon.com/rileyshane", let promoExpiration = Keychain.shared.palPromoExpiration, Date.now < promoExpiration
+        {
+            // User has promotional access to our betas, so treat all beta apps as if we've already pledged.
+            
+            for app in source.apps where app.isPledgeRequired
+            {
+                app.isPledged = true
+            }
+            
+            return
+        }
+        
         for app in source.apps where app.isPledgeRequired
         {
             if let requiredAppPledge = app.pledgeAmount
