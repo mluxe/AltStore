@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "AltStore-2.0.png",
+      "filename" : "AltStoreGold.png",
       "idiom" : "universal"
     },
     {
@@ -11,7 +11,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "AppIconDark.png",
+      "filename" : "AltStoreGoldDark.png",
       "idiom" : "universal"
     }
   ],

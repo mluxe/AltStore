@@ -122,5 +122,14 @@
 			<string>Inverted Prototype</string>
 		</dict>
 	</array>
+	<key>promo</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>Day One</string>
+			<key>imageName</key>
+			<string>DayOne</string>
+		</dict>
+	</array>
 </dict>
 </plist>

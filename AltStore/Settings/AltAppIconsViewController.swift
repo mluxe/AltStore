@@ -47,6 +47,7 @@ extension AltAppIconsViewController
         case gradient
         case recessed
         case classic
+        case promo
         
         var localizedName: String {
             switch self
@@ -55,6 +56,7 @@ extension AltAppIconsViewController
             case .gradient: return NSLocalizedString("Gradient", comment: "")
             case .recessed: return NSLocalizedString("Recessed", comment: "")
             case .classic: return NSLocalizedString("Classic", comment: "")
+            case .promo: return NSLocalizedString("Promo", comment: "")
             }
         }
     }
@@ -84,7 +86,14 @@ class AltAppIconsViewController: UICollectionViewController
             let fileURL = Bundle.main.url(forResource: "AltIcons", withExtension: "plist")!
             let data = try Data(contentsOf: fileURL)
             
-            let icons = try PropertyListDecoder().decode([Section: [AltIcon]].self, from: data)
+            var icons = try PropertyListDecoder().decode([Section: [AltIcon]].self, from: data)
+            
+            if Keychain.shared.stripeEmailAddress == nil
+            {
+                // Remove all promo icons unless user has linked Stripe account with PAL subscription
+                icons[.promo] = []
+            }
+            
             self.iconsBySection = icons
         }
         catch
@@ -144,7 +153,7 @@ private extension AltAppIconsViewController
             var config = cell.defaultContentConfiguration()
             config.text = icon.name
             config.textProperties.font = font
-            config.textProperties.color = .label
+            config.textProperties.color = .white
             
             let image = UIImage(named: icon.imageName)
             config.image = image
@@ -173,9 +182,6 @@ private extension AltAppIconsViewController
                 return .white.withAlphaComponent(0.25)
             }
             cell.backgroundConfiguration = backgroundConfiguration
-                        
-            // Ensure text is legible on green background.
-            cell.overrideUserInterfaceStyle = .dark
         }
         
         return dataSource
