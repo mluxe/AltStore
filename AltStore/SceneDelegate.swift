@@ -26,6 +26,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
         {
             self.open(context)
         }
+        
+        if let shortcutItem = connectionOptions.shortcutItem
+        {
+            self.handle(shortcutItem)
+        }
     }
 
     func sceneWillEnterForeground(_ scene: UIScene)
@@ -73,6 +78,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
     {
         guard let context = URLContexts.first else { return }
         self.open(context)
+    }
+    
+    func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) 
+    {
+        self.handle(shortcutItem)
+        completionHandler(true)
     }
 }
 
@@ -169,6 +180,14 @@ private extension SceneDelegate
             default: break
             }
         }
+    }
+    
+    func handle(_ shortcutItem: UIApplicationShortcutItem)
+    {
+        guard shortcutItem.type == "io.altstore.FAQAction" else { return }
+        
+        let faqURL = URL(string: "https://faq.altstore.io")!
+        UIApplication.shared.open(faqURL)
     }
 
     func redeemPALPromo(session: String, emailAddress: String)
