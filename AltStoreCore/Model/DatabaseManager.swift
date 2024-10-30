@@ -414,11 +414,12 @@ private extension DatabaseManager
             // Must go after comparing versions to see if we need to update our cached AltStore app bundle.
             installedApp.update(resignedApp: localApp, certificateSerialNumber: serialNumber, storeBuildVersion: storeBuildVersion)
             
-            if let version = Bundle.main.object(forInfoDictionaryKey: "ALTVersion") as? String
-            {
-                // Override app version if ALTVersion key exists.
-                installedApp.version = version
-            }
+            // DON'T override app version with ALTVersion now that source versions must match CFBundleShortVersionString.
+            // if let version = Bundle.main.object(forInfoDictionaryKey: "ALTVersion") as? String
+            // {
+            //     // Override app version if ALTVersion key exists.
+            //     installedApp.version = version
+            // }
             
             if installedApp.refreshedDate < cachedRefreshedDate
             {
