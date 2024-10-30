@@ -369,8 +369,11 @@ private extension AppMarketplace
             appVersion = latestSupportedVersion
         }
         
-        // Verify hosted ADP matches source
-        try await self.verifyRemoteADP(for: appVersion)
+        if await $storeApp.bundleIdentifier != StoreApp.altstoreAppID
+        {
+            // Verify hosted ADP matches source
+            try await self.verifyRemoteADP(for: appVersion)
+        }
         
         // Install app
         let installedApp = try await self._install(appVersion, operation: operation)
