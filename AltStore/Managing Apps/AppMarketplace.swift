@@ -938,8 +938,15 @@ extension AppMarketplace: URLSessionDelegate
             let certificate = certificates.first
         else { return (.cancelAuthenticationChallenge, nil) }
         
+        var commonName: CFString?
+        let status = SecCertificateCopyCommonName(certificate, &commonName)
+        guard status == 0 else {
+            Logger.main.error("Unknown common name for SSL certificate, rejecting challenge.")
+            return (.cancelAuthenticationChallenge, nil)
+        }
+        
         // Ensure certificate is a known pinned certificate.
-        guard self.pinnedCertificates.contains(certificate) else {
+        guard let name = commonName as? String, name == "altstore.io" else {
             Logger.main.error("Attempting server connection with unknown certificate, rejecting challenge.")
             return (.cancelAuthenticationChallenge, nil)
         }
