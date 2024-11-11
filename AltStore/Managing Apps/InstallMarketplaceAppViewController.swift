@@ -164,12 +164,13 @@ private extension InstallMarketplaceAppViewController
                                               confirmInstall: {
                 do
                 {
+                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID, isRedownload: self.isRedownload)
+                    
                     DispatchQueue.main.async {
                         self.dismiss(animated: true)
                         self.completionHandler?(.success(()))
                     }
                     
-                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID, isRedownload: self.isRedownload)
                     return .confirmed(installVerificationToken: installToken, authenticationContext: nil)
                 }
                 catch
@@ -194,12 +195,13 @@ private extension InstallMarketplaceAppViewController
                                               confirmInstall: {
                 do
                 {
+                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID, isRedownload: self.isRedownload)
+                    
                     DispatchQueue.main.async {
                         self.dismiss(animated: true)
                         self.completionHandler?(.success(()))
                     }
                     
-                    let installToken = try await AppMarketplace.shared.requestInstallToken(bundleID: bundleID, isRedownload: self.isRedownload)
                     return .confirmed(installVerificationToken: installToken, authenticationContext: nil)
                 }
                 catch
