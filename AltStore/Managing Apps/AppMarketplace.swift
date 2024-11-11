@@ -131,15 +131,16 @@ extension AppMarketplace
 {
     func update() async
     {
-        guard UserDefaults.shared.shouldManageInstalledApps else { return }
-        
         if !self.didUpdateInstalledApps
         {
-            // Wait until the first observed change before we trust the returned value.
             await withCheckedContinuation { continuation in
                 Task<Void, Never> { @MainActor in
+                    guard AppLibrary.current.isLoading else {
+                        return continuation.resume()
+                    }
+                    
                     _ = withObservationTracking {
-                        AppLibrary.current.installedApps
+                        AppLibrary.current.isLoading
                     } onChange: {
                         Task {
                             continuation.resume()
@@ -150,6 +151,8 @@ extension AppMarketplace
             
             self.didUpdateInstalledApps = true
         }
+        
+        guard UserDefaults.shared.shouldManageInstalledApps else { return }
         
         let installedMarketplaceApps = await AppLibrary.current.installedApps
         let installedMarketplaceAppsAndMetadata = await MainActor.run { installedMarketplaceApps.map { ($0, $0.installedMetadata) } }
