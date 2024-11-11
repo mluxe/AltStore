@@ -191,6 +191,9 @@ private extension PatreonViewController
 {
     @objc func fetchPatrons()
     {
+        // User explicitly navigated to this screen, so allow fetching friend zone patrons.
+        UserDefaults.shared.shouldFetchFriendZonePatrons = true
+        
         AppManager.shared.updatePatronsIfNeeded()
         self.update()
     }

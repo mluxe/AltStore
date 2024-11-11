@@ -38,6 +38,7 @@ public extension UserDefaults
     @NSManaged var patchedApps: [String]?
     
     @NSManaged var patronsRefreshID: String?
+    @NSManaged var shouldFetchFriendZonePatrons: Bool
     
     @NSManaged var skipPatreonDownloads: Bool
     

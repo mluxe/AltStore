@@ -60,7 +60,7 @@ class UpdatePatronsOperation: ResultOperation<Void>
                 Keychain.shared.patreonCreatorAccessToken = response.accessToken
                 
                 let previousRefreshID = UserDefaults.shared.patronsRefreshID
-                guard response.refreshID != previousRefreshID else {
+                guard response.refreshID != previousRefreshID && UserDefaults.shared.shouldFetchFriendZonePatrons else {
                     self.finish(.success(()))
                     return
                 }
@@ -84,6 +84,7 @@ class UpdatePatronsOperation: ResultOperation<Void>
                             try self.context.save()
                             
                             UserDefaults.shared.patronsRefreshID = response.refreshID
+                            UserDefaults.shared.shouldFetchFriendZonePatrons = false // Disable fetching friend zone patrons until user navigates to Patreon screen again.
                             
                             self.finish(.success(()))
                             
