@@ -571,6 +571,14 @@ private extension AppMarketplace
                 // App is currently being installed.
                 Logger.sideload.info("App \(bundleID, privacy: .public) has valid installation metadata!")
                 
+                guard installation.progress.fractionCompleted >= 0 && installation.progress.completedUnitCount >= 0 else {
+                    Logger.sideload.info("Installation progress is negative, polling until valid progress...")
+                    
+                    // Poll until we receive a valid progress object.
+                    try await Task.sleep(for: .milliseconds(50))
+                    continue
+                }
+                
                 if !didAddChildProgress
                 {
                     Logger.sideload.info("Added child progress for app \(bundleID, privacy: .public)")
@@ -618,6 +626,7 @@ private extension AppMarketplace
                         {
                             // One last sanity check: if progress is negative, check if AppLibrary _does_ report correct value.
                             // If it does, we can exit early.
+                            Logger.sideload.info("Negative installation progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                             
                             let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
                             if didInstallSuccessfully
