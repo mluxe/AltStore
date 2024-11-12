@@ -122,6 +122,7 @@ extension TabBarController
                 
         if let notification = (sender as? Notification), let sourceURL = notification.userInfo?[AppDelegate.addSourceDeepLinkURLKey] as? URL
         {
+            self.loadViewIfNeeded() // Initialize sourcesViewController
             self.sourcesViewController?.deepLinkSourceURL = sourceURL
         }
         
