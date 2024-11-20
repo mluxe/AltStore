@@ -572,7 +572,7 @@ private extension AppMarketplace
                 Logger.sideload.info("App \(bundleID, privacy: .public) has valid installation metadata!")
                 
                 guard installation.progress.fractionCompleted >= 0 && installation.progress.completedUnitCount >= 0 else {
-                    Logger.sideload.info("Installation progress is negative, polling until valid progress...")
+                    Logger.sideload.info("Installation progress for \(bundleID, privacy: .public) is negative, polling until valid progress...")
                     
                     // Poll until we receive a valid progress object.
                     try await Task.sleep(for: .milliseconds(50))
@@ -591,7 +591,7 @@ private extension AppMarketplace
                 {
                     // Progress has not yet completed, so add it as child and wait for it to complete.
                     
-                    Logger.sideload.info("Installation progress is less than 1.0, polling until finished...")
+                    Logger.sideload.info("Installation progress for \(bundleID, privacy: .public) is less than 1.0, polling until finished...")
                     
                     var fractionComplete: Double?
                     
@@ -600,13 +600,13 @@ private extension AppMarketplace
                         if installation.progress.isCancelled
                         {
                             // Installation was cancelled, so assume error occured.
-                            Logger.sideload.info("Installation cancelled! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
+                            Logger.sideload.info("Installation cancelled for \(bundleID, privacy: .public)! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                             throw CancellationError()
                         }
                         
                         if installation.progress.fractionCompleted == 1.0
                         {
-                            Logger.sideload.info("Installation finished with progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
+                            Logger.sideload.info("Installation of \(bundleID, privacy: .public) finished with progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                             break
                         }
                         
@@ -615,7 +615,7 @@ private extension AppMarketplace
                             // If fractionComplete has changed at least once but the value is negative, consider it complete.
                             if installation.progress.fractionCompleted < 0 || installation.progress.completedUnitCount < 0
                             {
-                                Logger.sideload.fault("Installation progress returned invalid value! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
+                                Logger.sideload.fault("Installation progress for \(bundleID, privacy: .public) returned invalid value! \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                                 break
                             }
                         }
@@ -626,7 +626,7 @@ private extension AppMarketplace
                         {
                             // One last sanity check: if progress is negative, check if AppLibrary _does_ report correct value.
                             // If it does, we can exit early.
-                            Logger.sideload.info("Negative installation progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
+                            Logger.sideload.info("Negative installation progress for \(bundleID, privacy: .public): \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                             
                             let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
                             if didInstallSuccessfully
@@ -635,7 +635,7 @@ private extension AppMarketplace
                             }
                         }
                         
-                        Logger.sideload.info("Installation progress: \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
+                        Logger.sideload.info("Installation progress for \(bundleID, privacy: .public): \(installation.progress.fractionCompleted) (\(installation.progress.completedUnitCount) of \(installation.progress.totalUnitCount))")
                         
                         // I hate that this is the best way to _reliably_ know when app finished installing...but it is.
                         try await Task.sleep(for: .seconds(0.5))
