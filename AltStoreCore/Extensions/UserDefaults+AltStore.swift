@@ -98,12 +98,6 @@ public extension UserDefaults
         (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios14) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios15_7_2)) ||
         (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16_2))
         
-        #if MARKETPLACE
-        let shouldManageInstalledApps = false
-        #else
-        let shouldManageInstalledApps = false
-        #endif
-        
         #if DEBUG
         let permissionCheckingDisabled = true
         #else
@@ -124,7 +118,7 @@ public extension UserDefaults
             #keyPath(UserDefaults.isCowExploitSupported): isMacDirtyCowSupported,
             #keyPath(UserDefaults.permissionCheckingDisabled): permissionCheckingDisabled,
             #keyPath(UserDefaults._preferredAppSorting): preferredAppSorting.rawValue,
-            #keyPath(UserDefaults.shouldManageInstalledApps): shouldManageInstalledApps,
+            #keyPath(UserDefaults.shouldManageInstalledApps): true,
         ] as [String: Any]
         
         #if MARKETPLACE
