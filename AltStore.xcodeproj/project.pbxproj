@@ -384,6 +384,7 @@
 		D5418F172AD740890014ABD6 /* AppScreenshotCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5418F162AD740890014ABD6 /* AppScreenshotCollectionViewCell.swift */; };
 		D54DED1428CBC44B008B27A0 /* ErrorLogTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54DED1328CBC44B008B27A0 /* ErrorLogTableViewCell.swift */; };
 		D552B1D82A042A740066216F /* AppPermissionsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D552B1D72A042A740066216F /* AppPermissionsCard.swift */; };
+		D552DE382D39ADED00E737BE /* PatreonAPI.plist in Resources */ = {isa = PBXBuildFile; fileRef = D552DE372D39ADED00E737BE /* PatreonAPI.plist */; };
 		D552EB062AF453F900A3AB4D /* URL+Normalized.swift in Sources */ = {isa = PBXBuildFile; fileRef = D552EB052AF453F900A3AB4D /* URL+Normalized.swift */; };
 		D55467B82A8D5E2600F4CE90 /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55467B12A8D5E2600F4CE90 /* AppShortcuts.swift */; };
 		D55467C52A8D72C300F4CE90 /* ActiveAppsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55467C42A8D72C300F4CE90 /* ActiveAppsWidget.swift */; };
@@ -1064,6 +1065,7 @@
 		D5418F162AD740890014ABD6 /* AppScreenshotCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppScreenshotCollectionViewCell.swift; sourceTree = "<group>"; };
 		D54DED1328CBC44B008B27A0 /* ErrorLogTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorLogTableViewCell.swift; sourceTree = "<group>"; };
 		D552B1D72A042A740066216F /* AppPermissionsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissionsCard.swift; sourceTree = "<group>"; };
+		D552DE372D39ADED00E737BE /* PatreonAPI.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PatreonAPI.plist; sourceTree = "<group>"; };
 		D552EB052AF453F900A3AB4D /* URL+Normalized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Normalized.swift"; sourceTree = "<group>"; };
 		D55467B12A8D5E2600F4CE90 /* AppShortcuts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppShortcuts.swift; sourceTree = "<group>"; };
 		D55467C42A8D72C300F4CE90 /* ActiveAppsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveAppsWidget.swift; sourceTree = "<group>"; };
@@ -1900,6 +1902,7 @@
 			children = (
 				BFCB9206250AB2120057B44E /* Colors.xcassets */,
 				D53D84012A2158FC00543C3B /* Permissions.plist */,
+				D552DE372D39ADED00E737BE /* PatreonAPI.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -2908,6 +2911,7 @@
 			files = (
 				BFCB9207250AB2120057B44E /* Colors.xcassets in Resources */,
 				D53D84022A2158FC00543C3B /* Permissions.plist in Resources */,
+				D552DE382D39ADED00E737BE /* PatreonAPI.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
