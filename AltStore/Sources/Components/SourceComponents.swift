@@ -111,3 +111,9 @@ class PlaceholderCollectionReusableView: UICollectionReusableView
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+class MoreAppsFooterView: UICollectionReusableView
+{
+    @IBOutlet var textLabel: UILabel!
+    @IBOutlet var button: UIButton!
+}

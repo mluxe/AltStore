@@ -28,12 +28,14 @@ extension AddSourceViewController
         case add
         case preview
         case recommended
+        case moreApps
     }
     
     private enum ReuseID: String
     {
         case textFieldCell = "TextFieldCell"
         case placeholderFooter = "PlaceholderFooter"
+        case moreAppsFooter = "MoreAppsFooter"
     }
     
     private class ViewModel: ObservableObject
@@ -64,6 +66,7 @@ class AddSourceViewController: UICollectionViewController
     private lazy var addSourceDataSource = self.makeAddSourceDataSource()
     private lazy var sourcePreviewDataSource = self.makeSourcePreviewDataSource()
     private lazy var recommendedSourcesDataSource = self.makeRecommendedSourcesDataSource()
+    private lazy var moreAppsDataSource = self.makeMoreAppsDataSource()
     
     private var fetchRecommendedSourcesOperation: UpdateKnownSourcesOperation?
     private var fetchRecommendedSourcesResult: Result<Void, Error>?
@@ -118,6 +121,9 @@ private extension AddSourceViewController
         
         let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
             guard let self, let section = Section(rawValue: sectionIndex) else { return nil }
+            
+            let isPreviewingSource = (self.viewModel.sourceURL != nil && self.viewModel.isShowingPreviewStatus)
+            
             switch section
             {
             case .add:
@@ -140,7 +146,7 @@ private extension AddSourceViewController
                 configuration.showsSeparators = false
                 configuration.backgroundColor = .clear
                 
-                if self.viewModel.sourceURL != nil && self.viewModel.isShowingPreviewStatus
+                if isPreviewingSource
                 {
                     switch self.viewModel.sourcePreviewResult
                     {
@@ -156,12 +162,30 @@ private extension AddSourceViewController
                 }
                 
                 let layoutSection = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: layoutEnvironment)
+                
+                if configuration.footerMode == .supplementary
+                {
+                    // Add some additional padding between cells and footer.
+                    layoutSection.contentInsets.bottom = 10
+                }
+                else
+                {
+                    // No footer, so keep padding to minimum to ensure "Discover more apps" button is visible.
+                    layoutSection.contentInsets.bottom = 0
+                }
+                
                 return layoutSection
                 
             case .recommended:
                 var configuration = UICollectionLayoutListConfiguration(appearance: .grouped)
                 configuration.showsSeparators = false
                 configuration.backgroundColor = .clear
+                
+                if #available(iOS 15, *), isPreviewingSource
+                {
+                    // If previewing source, ensure there is additional padding.
+                    configuration.headerTopPadding = 10
+                }
                 
                 switch self.fetchRecommendedSourcesResult
                 {
@@ -178,6 +202,41 @@ private extension AddSourceViewController
                 }
                 
                 let layoutSection = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: layoutEnvironment)
+                
+                if configuration.footerMode == .none
+                {
+                    // No footer, so keep padding to minimum to ensure "Discover more apps" button is visible.
+                    layoutSection.contentInsets.bottom = 4
+                }
+                
+                return layoutSection
+                
+            case .moreApps:
+                var configuration = UICollectionLayoutListConfiguration(appearance: .grouped)
+                configuration.showsSeparators = false
+                configuration.backgroundColor = .clear
+                configuration.footerMode = .none
+                
+                #if MARKETPLACE
+                // Only show "Discover more apps" button in PAL.
+                configuration.headerMode = .supplementary
+                #endif
+                
+                switch self.fetchRecommendedSourcesResult
+                {
+                case .success where !(UserDefaults.shared.recommendedSources ?? []).isEmpty:
+                    // No footer, so keep padding to minimum to ensure "Discover more apps" button is visible.
+                    break
+                    
+                default:
+                    // Previous section is showing footer, so add padding.
+                    if #available(iOS 15, *)
+                    {
+                        configuration.headerTopPadding = 20
+                    }
+                }
+                
+                let layoutSection = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: layoutEnvironment)
                 return layoutSection
             }
         }, configuration: layoutConfig)
@@ -189,7 +248,8 @@ private extension AddSourceViewController
     {
         let dataSource = RSTCompositeCollectionViewPrefetchingDataSource<Source, UIImage>(dataSources: [self.addSourceDataSource, 
                                                                                                         self.sourcePreviewDataSource,
-                                                                                                        self.recommendedSourcesDataSource])
+                                                                                                        self.recommendedSourcesDataSource,
+                                                                                                        self.moreAppsDataSource])
         dataSource.proxy = self
         return dataSource
     }
@@ -297,6 +357,14 @@ private extension AddSourceViewController
             }
         }
         
+        return dataSource
+    }
+    
+    func makeMoreAppsDataSource() -> RSTDynamicCollectionViewPrefetchingDataSource<Source, UIImage>
+    {
+        let dataSource = RSTDynamicCollectionViewPrefetchingDataSource<Source, UIImage>()
+        dataSource.numberOfSectionsHandler = { 1 }
+        dataSource.numberOfItemsHandler = { _ in 0 }
         return dataSource
     }
 }
@@ -692,6 +760,12 @@ private extension AddSourceViewController
         
         presentingViewController.dismiss(animated: true)
     }
+    
+    @objc func viewMoreApps()
+    {
+        let openURL = URL(string: "https://altstore.io/discover-apps")!
+        UIApplication.shared.open(openURL)
+    }
 }
 
 private extension AddSourceViewController
@@ -792,6 +866,11 @@ extension AddSourceViewController: UICollectionViewDelegateFlowLayout
                 footerView.placeholderView.activityIndicatorView.startAnimating()
             }
             
+            return footerView
+            
+        case (.moreApps, UICollectionView.elementKindSectionHeader): // Despite being called MoreAppsFooterView, we use as header to minimize spacing.
+            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: ReuseID.moreAppsFooter.rawValue, for: indexPath) as! MoreAppsFooterView
+            footerView.button.addTarget(self, action: #selector(AddSourceViewController.viewMoreApps), for: .primaryActionTriggered)
             return footerView
             
         default: fatalError()
