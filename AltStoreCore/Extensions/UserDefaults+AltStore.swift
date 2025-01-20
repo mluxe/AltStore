@@ -98,10 +98,18 @@ public extension UserDefaults
         (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios14) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios15_7_2)) ||
         (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16_2))
         
+        let ios18 = OperatingSystemVersion(majorVersion: 18, minorVersion: 0, patchVersion: 0)
+        
         #if DEBUG
         let permissionCheckingDisabled = true
         #else
         let permissionCheckingDisabled = false
+        #endif
+        
+        #if MARKETPLACE
+        let shouldManageInstalledApps = ProcessInfo.processInfo.isOperatingSystemAtLeast(ios18)
+        #else
+        let shouldManageInstalledApps = false
         #endif
         
         // Pre-iOS 15 doesn't support custom sorting, so default to sorting by name.
@@ -118,7 +126,7 @@ public extension UserDefaults
             #keyPath(UserDefaults.isCowExploitSupported): isMacDirtyCowSupported,
             #keyPath(UserDefaults.permissionCheckingDisabled): permissionCheckingDisabled,
             #keyPath(UserDefaults._preferredAppSorting): preferredAppSorting.rawValue,
-            #keyPath(UserDefaults.shouldManageInstalledApps): true,
+            #keyPath(UserDefaults.shouldManageInstalledApps): shouldManageInstalledApps,
         ] as [String: Any]
         
         #if MARKETPLACE
