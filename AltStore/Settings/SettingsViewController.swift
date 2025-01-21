@@ -119,7 +119,11 @@ class SettingsViewController: UITableViewController
         debugModeGestureRecognizer.numberOfTouchesRequired = 3
         self.tableView.addGestureRecognizer(debugModeGestureRecognizer)
         
-        if let installedApp = InstalledApp.fetchAltStore(in: DatabaseManager.shared.viewContext)
+        if let version = Bundle.main.object(forInfoDictionaryKey: "ALTVersion") as? String
+        {
+            self.versionLabel.text = NSLocalizedString(String(format: "Version %@", version), comment: "AltStore Version")
+        }
+        else if let installedApp = InstalledApp.fetchAltStore(in: DatabaseManager.shared.viewContext)
         {
             #if BETA
             // Only show build version for BETA builds.
