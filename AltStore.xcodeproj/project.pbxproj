@@ -469,6 +469,7 @@
 		D5CE309C2B4C946300DB8151 /* AltStore15ToAltStore16.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = D5CE309B2B4C946300DB8151 /* AltStore15ToAltStore16.xcmappingmodel */; };
 		D5CF17262B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5CF17252B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift */; };
 		D5CF568C2A0D8EEC006D93E2 /* VerificationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5CF56812A0D83F9006D93E2 /* VerificationError.swift */; };
+		D5D3BFB22D4D87A5000FFFAF /* Media.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D3BFB12D4D87A5000FFFAF /* Media.swift */; };
 		D5DAE0962804DF430034D8D4 /* UpdatePatronsOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DAE0952804DF430034D8D4 /* UpdatePatronsOperation.swift */; };
 		D5DB145A28F9DC5A00A8F606 /* ALTLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DB145828F9DC1000A8F606 /* ALTLocalizedError.swift */; };
 		D5DB145B28F9DC5C00A8F606 /* ALTLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DB145828F9DC1000A8F606 /* ALTLocalizedError.swift */; };
@@ -1150,6 +1151,7 @@
 		D5CF17242B96821D002EC4C7 /* AltMarketplace.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AltMarketplace.entitlements; sourceTree = "<group>"; };
 		D5CF17252B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallMarketplaceAppViewController.swift; sourceTree = "<group>"; };
 		D5CF56812A0D83F9006D93E2 /* VerificationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationError.swift; sourceTree = "<group>"; };
+		D5D3BFB12D4D87A5000FFFAF /* Media.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Media.swift; sourceTree = "<group>"; };
 		D5DAE0952804DF430034D8D4 /* UpdatePatronsOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePatronsOperation.swift; sourceTree = "<group>"; };
 		D5DB145828F9DC1000A8F606 /* ALTLocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ALTLocalizedError.swift; sourceTree = "<group>"; };
 		D5DB81632B0410BC003F5F8B /* AppSorting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSorting.swift; sourceTree = "<group>"; };
@@ -1645,6 +1647,7 @@
 				D5A645222AF5B5C50047D980 /* PatreonAPI+Responses.swift */,
 				BF66EEA02501AEC5007EE018 /* Benefit.swift */,
 				BF66EEA22501AEC5007EE018 /* Campaign.swift */,
+				D5D3BFB12D4D87A5000FFFAF /* Media.swift */,
 				BF66EEA32501AEC5007EE018 /* Patron.swift */,
 				BF66EEA42501AEC5007EE018 /* Tier.swift */,
 				D5A645242AF5BC7F0047D980 /* UserAccount.swift */,
@@ -3336,6 +3339,7 @@
 				BF66EEE12501AECA007EE018 /* DatabaseManager.swift in Sources */,
 				D52C08EE28AEC37A006C4AE5 /* AppVersion.swift in Sources */,
 				BF66EEEA2501AED0007EE018 /* UIColor+Hex.swift in Sources */,
+				D5D3BFB22D4D87A5000FFFAF /* Media.swift in Sources */,
 				BF66EECC2501AECA007EE018 /* Source.swift in Sources */,
 				BF66EED72501AECA007EE018 /* InstalledApp.swift in Sources */,
 				D5DB145A28F9DC5A00A8F606 /* ALTLocalizedError.swift in Sources */,

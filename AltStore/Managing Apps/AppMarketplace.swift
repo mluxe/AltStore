@@ -828,11 +828,48 @@ extension AppMarketplace
     private func fetchADPManifest(@AsyncManaged for appVersion: AltStoreCore.AppVersion) async throws -> ADPManifest
     {
         let downloadURL = await $appVersion.downloadURL
-        let manifestURL = downloadURL.appending(path: "manifest.json")
+        let manifestURL: URL
+        
+        if downloadURL.absoluteString.lowercased().contains("patreon.com/posts/")
+        {
+            manifestURL = try await self.manifestURL(forPatreonPost: downloadURL)
+        }
+        else
+        {
+            manifestURL = downloadURL.appending(path: "manifest.json")
+        }
         
         let request = URLRequest(url: manifestURL)
         let adp = try await self.send(request, expecting: ADPManifest.self)
         return adp
+    }
+    
+    private func manifestURL(forPatreonPost postURL: URL) async throws -> URL
+    {
+        var postLink = postURL.absoluteString
+        
+        // Remove trailing "/" if there is one.
+        if postLink.hasSuffix("/")
+        {
+            postLink.removeLast()
+        }
+        
+        guard let lastNonDigitIndex = postLink.lastIndex(where: { !$0.isNumber }) else {
+            throw OperationError.unknown(failureReason: NSLocalizedString("Unable to parse Patreon post URL.", comment: ""))
+        }
+        
+        // Assume everything after the last non-digit character (most likely `-` or `/`) is the post's ID
+        let index = postLink.index(after: lastNonDigitIndex)
+        let postID = String(postLink[index...])
+        
+        let allMedia = try await PatreonAPI.shared.fetchPostMedia(postID: postID)
+        guard let media = allMedia.first(where: { $0.filename.lowercased() == "manifest.json" }) else {
+            throw OperationError.unknown(failureReason: NSLocalizedString("Failed to retrieve manifest.json URL from Patreon post.", comment: ""))
+        }
+        
+        // Construct download URL based on standard Patreon format.
+        let downloadURL = URL(string: "https://www.patreon.com/file?h=\(postID)&m=\(media.identifier)")!
+        return downloadURL
     }
     
     private func send<T: Decodable>(_ request: URLRequest, pinCertificates: Bool = false, expecting: T.Type) async throws -> T

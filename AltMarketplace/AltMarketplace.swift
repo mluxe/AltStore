@@ -37,7 +37,17 @@ final class AltMarketplace: MarketplaceExtension
         let bundleVersion = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as? String ?? "1"
         var additionalHeaders = ["ALT_PAL_VER": bundleVersion]
         
-        guard let requestURL = request.url, requestURL.path().contains("restore") || requestURL.path().contains("update") else { return additionalHeaders }
+        guard
+            let pathComponents = request.url?.pathComponents, pathComponents.count > 1,
+            case let rootPath = pathComponents[1], // pathComponents[0] is always "/"
+            rootPath == "install" || rootPath == "restore" || rootPath == "update"
+        else { return additionalHeaders }
+        
+        // Add Patreon cookie headers for authentication
+        let cookieHeaders = HTTPCookie.requestHeaderFields(with: PatreonAPI.shared.authCookies)
+        additionalHeaders.merge(cookieHeaders) { a, b in b }
+        
+        guard rootPath == "restore" || rootPath == "update" else { return additionalHeaders }
         
         do
         {

@@ -12,6 +12,11 @@ import CoreData
 import WebKit
 import OSLog
 
+private extension HTTPCookieStorage
+{
+    static let altstore = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.io.altstore.AltStore")
+}
+
 typealias PatreonAPIError = PatreonAPIErrorCode.Error
 enum PatreonAPIErrorCode: Int, ALTErrorEnum, CaseIterable
 {
@@ -37,6 +42,7 @@ extension PatreonAPI
     
     typealias FetchAccountResponse = Response<UserAccountResponse>
     typealias FriendZonePatronsResponse = Response<[PatronResponse]>
+    typealias FetchMediaResponse = Response<[MediaResponse]>
     
     enum AuthorizationType
     {
@@ -291,6 +297,27 @@ public extension PatreonAPI
         fetchPatrons(url: requestURL)
     }
     
+    func fetchPostMedia(postID: String) async throws -> [Media]
+    {
+        var components = URLComponents(string: "/api/posts/\(postID)/media")!
+        components.queryItems = [
+            URLQueryItem(name: "page[count]", value: "10000"), // Very large number that is still valid
+            URLQueryItem(name: "fields[media]", value: "file_name,mimetype")
+        ]
+        
+        let requestURL = components.url(relativeTo: self.baseURL)!
+        let request = URLRequest(url: requestURL)
+        
+        let response = try await withCheckedThrowingContinuation { continuation in
+            self.send(request, authorizationType: .none) { (result: Result<FetchMediaResponse, Swift.Error>) in
+                continuation.resume(with: result)
+            }
+        }
+        
+        let media = response.data.map { Media(response: $0) }
+        return media
+    }
+    
     func signOut(completion: @escaping (Result<Void, Swift.Error>) -> Void)
     {
         DatabaseManager.shared.persistentContainer.performBackgroundTask { (context) in
@@ -341,7 +368,7 @@ public extension PatreonAPI
 extension PatreonAPI
 {
     public var authCookies: [HTTPCookie] {
-        let cookies = HTTPCookieStorage.shared.cookies(for: URL(string: "https://www.patreon.com")!) ?? []
+        let cookies = HTTPCookieStorage.altstore.cookies(for: URL(string: "https://www.patreon.com")!) ?? []
         return cookies
     }
     
@@ -353,7 +380,7 @@ extension PatreonAPI
         for cookie in cookies where cookie.domain.lowercased().hasSuffix("patreon.com")
         {
             Logger.main.debug("Saving Patreon cookie \(cookie.name, privacy: .public): \(cookie.value, privacy: .private(mask: .hash)) (Expires: \(cookie.expiresDate?.description ?? "nil", privacy: .public))")
-            HTTPCookieStorage.shared.setCookie(cookie)
+            HTTPCookieStorage.altstore.setCookie(cookie)
         }
     }
     
@@ -368,7 +395,7 @@ extension PatreonAPI
             Logger.main.debug("Deleting Patreon cookie \(cookie.name, privacy: .public) (Expires: \(cookie.expiresDate?.description ?? "nil", privacy: .public))")
             
             await cookieStore.deleteCookie(cookie)
-            HTTPCookieStorage.shared.deleteCookie(cookie)
+            HTTPCookieStorage.altstore.deleteCookie(cookie)
         }
         
         Logger.main.info("Cleared Patreon cookie cache!")
