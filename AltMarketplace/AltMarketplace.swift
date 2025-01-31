@@ -80,6 +80,7 @@ final class AltMarketplace: MarketplaceExtension
         catch
         {
             Logger.main.error("Failed to provide additional headers for request \(request, privacy: .public). \(error.localizedDescription, privacy: .public)")
+            additionalHeaders["ALT_PAL_ERROR"] = error.localizedDescription
         }
         
         return additionalHeaders
