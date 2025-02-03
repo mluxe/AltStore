@@ -25,9 +25,12 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
     
     @NSManaged public var date: Date
     @NSManaged public var localizedDescription: String?
-    @NSManaged public var downloadURL: URL
     @NSManaged public var size: Int64
     @NSManaged public var sha256: String?
+    
+    @NSManaged public var downloadURL: URL
+    @NSManaged public internal(set) var normalizedDownloadURL: String?
+    @NSManaged public internal(set) var assetURLs: [String: URL]?
     
     @nonobjc public var minOSVersion: OperatingSystemVersion? {
         guard let osVersionString = self._minOSVersion else { return nil }
@@ -66,6 +69,7 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
         case localizedDescription
         case localizedDescriptions = "_localizedDescriptions"
         case downloadURL
+        case assetURLs
         case size
         case sha256
         case minOSVersion
@@ -98,6 +102,9 @@ public class AppVersion: NSManagedObject, Decodable, Fetchable
             }
             
             self.downloadURL = try container.decode(URL.self, forKey: .downloadURL)
+            self.normalizedDownloadURL = self.downloadURL.normalizedForInstallURL()
+            self.assetURLs = try container.decodeIfPresent([String: URL].self, forKey: .assetURLs)
+            
             self.size = try container.decode(Int64.self, forKey: .size)
             
             self.sha256 = try container.decodeIfPresent(String.self, forKey: .sha256)?.lowercased()

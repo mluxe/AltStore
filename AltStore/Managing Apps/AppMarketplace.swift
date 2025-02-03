@@ -827,10 +827,14 @@ extension AppMarketplace
     
     private func fetchADPManifest(@AsyncManaged for appVersion: AltStoreCore.AppVersion) async throws -> ADPManifest
     {
-        let downloadURL = await $appVersion.downloadURL
-        let manifestURL: URL
+        let (downloadURL, assetURLs) = await $appVersion.perform { ($0.downloadURL, $0.assetURLs) }
         
-        if downloadURL.absoluteString.lowercased().contains("patreon.com/posts/")
+        let manifestURL: URL
+        if let assetURL = assetURLs?["manifest"]
+        {
+            manifestURL = assetURL
+        }
+        else if downloadURL.absoluteString.lowercased().contains("patreon.com/posts/")
         {
             manifestURL = try await self.manifestURL(forPatreonPost: downloadURL)
         }

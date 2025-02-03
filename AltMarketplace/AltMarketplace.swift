@@ -39,7 +39,7 @@ final class AltMarketplace: MarketplaceExtension
         
         guard
             let pathComponents = request.url?.pathComponents, pathComponents.count > 1,
-            case let rootPath = pathComponents[1], // pathComponents[0] is always "/"
+            case let rootPath = pathComponents[1].lowercased(), // pathComponents[0] is always "/"
             rootPath == "install" || rootPath == "restore" || rootPath == "update"
         else { return additionalHeaders }
         
@@ -47,44 +47,76 @@ final class AltMarketplace: MarketplaceExtension
         let cookieHeaders = HTTPCookie.requestHeaderFields(with: PatreonAPI.shared.authCookies)
         additionalHeaders.merge(cookieHeaders) { a, b in b }
         
-        guard rootPath == "restore" || rootPath == "update" else { return additionalHeaders }
-        
         do
         {
-            guard let data = request.httpBody else { throw URLError(URLError.Code.unsupportedURL) }
-            
-            let payload = try Foundation.JSONDecoder().decode(InstallAppRequest.self, from: data)
-            
-            for app in payload.apps
+            switch rootPath
             {
-                guard let marketplaceID = AppleItemID(app.appleItemId) else { continue }
-                        
+            case "install" where pathComponents.count > 2:
+                let normalizedDownloadURL = pathComponents[2]
+                
                 let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
-                
-                let values = context.performAndWait { () -> (bundleID: String, adpURL: URL, version: String, buildVersion: String)? in
+                let values = context.performAndWait { () -> AppVersionValues? in
                     //TODO: Somehow determine which source to use if there are multiple.
-                    let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp._marketplaceID), marketplaceID.description)
-                    guard let storeApp = StoreApp.first(satisfying: predicate, in: context) else { return nil }
-                    
-                    let installedAppVersion = storeApp.installedApp?.version ?? storeApp.latestSupportedVersion?.version
-                    
-                    // Return values
-                    guard let appVersion = storeApp.versions.first(where: { $0.version == installedAppVersion }), let buildVersion = appVersion.buildVersion else { return nil }
-                    return (storeApp.bundleIdentifier, appVersion.downloadURL, appVersion.version, buildVersion)
+                    let predicate = NSPredicate(format: "%K == %@", #keyPath(AltStoreCore.AppVersion.normalizedDownloadURL), normalizedDownloadURL)
+                    guard let appVersion = AltStoreCore.AppVersion.first(satisfying: predicate, in: context) else { return nil }
+                    return AppVersionValues(appVersion)
                 }
                 
-                if let values
+                if let assetURLs = values?.assetURLs
                 {
-                    let bundleID = HTTPHeader.bundleID(for: marketplaceID)
-                    let adpHeader = HTTPHeader.adpURL(for: marketplaceID)
-                    let versionHeader = HTTPHeader.version(for: marketplaceID)
-                    let buildVersionHeader = HTTPHeader.buildVersion(for: marketplaceID)
-                    
-                    additionalHeaders[bundleID.rawValue] = values.bundleID
-                    additionalHeaders[adpHeader.rawValue] = values.adpURL.absoluteString
-                    additionalHeaders[versionHeader.rawValue] = values.version
-                    additionalHeaders[buildVersionHeader.rawValue] = values.buildVersion
+                    for (assetID, downloadURL) in assetURLs
+                    {
+                        let header = HTTPHeader.assetURL(for: assetID)
+                        additionalHeaders[header.rawValue] = downloadURL.absoluteString
+                    }
                 }
+                
+            case "restore", "update":
+                guard let data = request.httpBody else { throw URLError(URLError.Code.unsupportedURL) }
+                
+                let payload = try Foundation.JSONDecoder().decode(InstallAppRequest.self, from: data)
+                
+                for app in payload.apps
+                {
+                    guard let marketplaceID = AppleItemID(app.appleItemId) else { continue }
+                    
+                    let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+                    let values = context.performAndWait { () -> AppVersionValues? in
+                        //TODO: Somehow determine which source to use if there are multiple.
+                        let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp._marketplaceID), marketplaceID.description)
+                        guard let storeApp = StoreApp.first(satisfying: predicate, in: context) else { return nil }
+                        
+                        let installedAppVersion = storeApp.installedApp?.version ?? storeApp.latestSupportedVersion?.version
+                        
+                        // Return values
+                        guard let appVersion = storeApp.versions.first(where: { $0.version == installedAppVersion }) else { return nil }
+                        return AppVersionValues(appVersion)
+                    }
+                    
+                    if let values
+                    {
+                        let bundleID = HTTPHeader.bundleID(for: marketplaceID)
+                        let adpHeader = HTTPHeader.adpURL(for: marketplaceID)
+                        let versionHeader = HTTPHeader.version(for: marketplaceID)
+                        let buildVersionHeader = HTTPHeader.buildVersion(for: marketplaceID)
+                        
+                        additionalHeaders[bundleID.rawValue] = values.bundleID
+                        additionalHeaders[adpHeader.rawValue] = values.adpURL.absoluteString
+                        additionalHeaders[versionHeader.rawValue] = values.version
+                        additionalHeaders[buildVersionHeader.rawValue] = values.buildVersion
+                        
+                        if let assetURLs = values.assetURLs
+                        {
+                            for (assetID, downloadURL) in assetURLs
+                            {
+                                let header = HTTPHeader.assetURL(for: assetID)
+                                additionalHeaders[header.rawValue] = downloadURL.absoluteString
+                            }
+                        }
+                    }
+                }
+                
+            default: break
             }
         }
         catch

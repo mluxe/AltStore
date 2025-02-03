@@ -1,5 +1,5 @@
 //
-//  URL+Normalized.swift
+//  URL+AltStore.swift
 //  AltStoreCore
 //
 //  Created by Riley Testut on 11/2/23.
@@ -10,6 +10,31 @@ import Foundation
 
 public extension URL
 {
+#if STAGING
+static let marketplaceDomain = "https://dev.altstore.io"
+#else
+static let marketplaceDomain = "https://api.altstore.io"
+#endif
+    
+    func normalizedForInstallURL() -> String
+    {
+        // AWS has trouble parsing URLs with encoded `/`, so we replace them with '|' before encoding.
+        // This technically breaks any URLs with '|' in them, but YOLO.
+        let encodedADPLink = self.absoluteString.replacingOccurrences(of: "/", with: "|").lowercased()
+        return encodedADPLink
+    }
+    
+    static func installURL(for adpURL: URL) -> URL?
+    {
+        let encodedADPLink = adpURL.normalizedForInstallURL()
+        
+        var components = URLComponents(string: URL.marketplaceDomain)!
+        components.path += "/install/" + encodedADPLink // Assigning path will implicitly percent-encode it
+
+        let redirectURL = components.url
+        return redirectURL
+    }
+    
     func normalized() throws -> String
     {
         // Based on https://encyclopedia.pub/entry/29841

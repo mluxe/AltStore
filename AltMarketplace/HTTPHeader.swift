@@ -39,4 +39,10 @@ struct HTTPHeader: RawRepresentable
         let header = HTTPHeader(rawValue: "alt-bundleID-" + String(appleItemID))
         return header
     }
+    
+    static func assetURL(for assetID: String) -> HTTPHeader
+    {
+        let header = HTTPHeader(rawValue: "alt-asset-" + assetID)
+        return header
+    }
 }
