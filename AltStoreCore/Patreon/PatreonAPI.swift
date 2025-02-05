@@ -12,11 +12,6 @@ import CoreData
 import WebKit
 import OSLog
 
-private extension HTTPCookieStorage
-{
-    static let altstore = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.io.altstore.AltStore")
-}
-
 typealias PatreonAPIError = PatreonAPIErrorCode.Error
 enum PatreonAPIErrorCode: Int, ALTErrorEnum, CaseIterable
 {
@@ -368,7 +363,12 @@ public extension PatreonAPI
 extension PatreonAPI
 {
     public var authCookies: [HTTPCookie] {
-        let cookies = HTTPCookieStorage.altstore.cookies(for: URL(string: "https://www.patreon.com")!) ?? []
+        var cookies = HTTPCookieStorage.altstore.cookies(for: URL(string: "https://www.patreon.com")!) ?? []
+        if cookies.isEmpty
+        {
+            cookies = HTTPCookieStorage.shared.cookies(for: URL(string: "https://www.patreon.com")!) ?? []
+        }
+        
         return cookies
     }
     
@@ -396,6 +396,7 @@ extension PatreonAPI
             
             await cookieStore.deleteCookie(cookie)
             HTTPCookieStorage.altstore.deleteCookie(cookie)
+            HTTPCookieStorage.shared.deleteCookie(cookie) // Clear up any legacy cookies just in case.
         }
         
         Logger.main.info("Cleared Patreon cookie cache!")

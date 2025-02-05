@@ -104,6 +104,7 @@ actor AppMarketplace: NSObject
 {
     static let shared = AppMarketplace()
     
+    private let session = URLSession(configuration: .sharedCookies)
     private let pinnedCertificates: [SecCertificate]
     
     private var didUpdateInstalledApps = false
@@ -878,7 +879,7 @@ extension AppMarketplace
     
     private func send<T: Decodable>(_ request: URLRequest, pinCertificates: Bool = false, expecting: T.Type) async throws -> T
     {
-        let session = pinCertificates ? URLSession(configuration: .default, delegate: self, delegateQueue: nil) : URLSession.shared
+        let session = pinCertificates ? URLSession(configuration: .sharedCookies, delegate: self, delegateQueue: nil) : self.session
         
         let (data, urlResponse) = try await session.data(for: request)
         guard let requestURL = request.url, let httpResponse = urlResponse as? HTTPURLResponse else { throw OperationError.unknown() }

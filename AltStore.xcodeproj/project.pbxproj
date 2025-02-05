@@ -365,6 +365,7 @@
 		D52A2F972ACB40F700BDF8E3 /* Logger+AltStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52A2F962ACB40F700BDF8E3 /* Logger+AltStore.swift */; };
 		D52B4ABF2AF183F0005991C3 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52B4ABE2AF183F0005991C3 /* WebViewController.swift */; };
 		D52C08EE28AEC37A006C4AE5 /* AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52C08ED28AEC37A006C4AE5 /* AppVersion.swift */; };
+		D52C2E852D54023C007C7BF1 /* HTTPCookieStorage+AltStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52C2E842D540235007C7BF1 /* HTTPCookieStorage+AltStore.swift */; };
 		D52C73652B688B2200E8751C /* InstalledApp+LoadIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52C73642B688B2200E8751C /* InstalledApp+LoadIcon.swift */; };
 		D52C8F012AFC144C00CA0BDD /* FeaturedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52C8F002AFC144C00CA0BDD /* FeaturedViewController.swift */; };
 		D52C8F032AFC56F000CA0BDD /* StoreCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52C8F022AFC56F000CA0BDD /* StoreCategory.swift */; };
@@ -1046,6 +1047,7 @@
 		D52A2F962ACB40F700BDF8E3 /* Logger+AltStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+AltStore.swift"; sourceTree = "<group>"; };
 		D52B4ABE2AF183F0005991C3 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		D52C08ED28AEC37A006C4AE5 /* AppVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersion.swift; sourceTree = "<group>"; };
+		D52C2E842D540235007C7BF1 /* HTTPCookieStorage+AltStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HTTPCookieStorage+AltStore.swift"; sourceTree = "<group>"; };
 		D52C73642B688B2200E8751C /* InstalledApp+LoadIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InstalledApp+LoadIcon.swift"; sourceTree = "<group>"; };
 		D52C8F002AFC144C00CA0BDD /* FeaturedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeaturedViewController.swift; sourceTree = "<group>"; };
 		D52C8F022AFC56F000CA0BDD /* StoreCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCategory.swift; sourceTree = "<group>"; };
@@ -1743,6 +1745,7 @@
 				D5B6F6A82AD75D01007EED5A /* ProcessInfo+Previews.swift */,
 				D552EB052AF453F900A3AB4D /* URL+AltStore.swift */,
 				D56842A82C62A1A800FB1AB4 /* KeyedDecodingContainer+LocalizedValues.swift */,
+				D52C2E842D540235007C7BF1 /* HTTPCookieStorage+AltStore.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3276,6 +3279,7 @@
 				D552EB062AF453F900A3AB4D /* URL+AltStore.swift in Sources */,
 				BFAECC522501B0A400528F27 /* CodableError.swift in Sources */,
 				D51E83822B8692DF0092FC61 /* AltStore16ToAltStore17.xcmappingmodel in Sources */,
+				D52C2E852D54023C007C7BF1 /* HTTPCookieStorage+AltStore.swift in Sources */,
 				D5F9821D2AB900060045751F /* AppScreenshot.swift in Sources */,
 				BF66EE9E2501AEC1007EE018 /* Fetchable.swift in Sources */,
 				BF66EEDF2501AECA007EE018 /* PatreonAccount.swift in Sources */,

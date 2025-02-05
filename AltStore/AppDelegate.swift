@@ -67,7 +67,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         ServerManager.shared.startDiscovering()
         
-        SecureValueTransformer.register()        
+        SecureValueTransformer.register()
+        
+        HTTPCookieStorage.migrateLocalPatreonCookiesIfNeeded()
         
         if UserDefaults.standard.firstLaunch == nil
         {

@@ -26,7 +26,7 @@ class DownloadAppOperation: ResultOperation<ALTApplication>
     private let bundleIdentifier: String
     private let destinationURL: URL
     
-    private let session = URLSession(configuration: .default)
+    private let session = URLSession(configuration: .sharedCookies)
     private let temporaryDirectory = FileManager.default.uniqueTemporaryURL()
     
     private var downloadPatreonAppContinuation: CheckedContinuation<URL, Error>?
