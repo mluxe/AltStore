@@ -31,11 +31,12 @@ class SourcesViewController: UICollectionViewController
     private let managedObjectContext = DatabaseManager.shared.persistentContainer.newBackgroundSavingViewContext()
     private lazy var dataSource = self.makeDataSource()
     
-    private weak var _installingApp: StoreApp?
-    
     private var placeholderView: RSTPlaceholderView!
     private var placeholderViewButton: UIButton!
     private var placeholderViewCenterYConstraint: NSLayoutConstraint!
+
+    private var _viewDidAppear = false
+    private weak var _installingApp: StoreApp?
     
     override func viewDidLoad()
     {
@@ -119,6 +120,7 @@ class SourcesViewController: UICollectionViewController
     {
         super.viewDidAppear(animated)
         
+        self._viewDidAppear = true
         self.handleAddSourceDeepLink()
     }
     
@@ -341,7 +343,7 @@ private extension SourcesViewController
 {
     func handleAddSourceDeepLink()
     {
-        guard let url = self.deepLinkSourceURL, self.view.window != nil else { return }
+        guard let url = self.deepLinkSourceURL, self._viewDidAppear else { return }
         
         // Only handle deep link once.
         self.deepLinkSourceURL = nil
