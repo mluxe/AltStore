@@ -28,6 +28,7 @@ class SourcesViewController: UICollectionViewController
         }
     }
     
+    private let managedObjectContext = DatabaseManager.shared.persistentContainer.newBackgroundSavingViewContext()
     private lazy var dataSource = self.makeDataSource()
     
     private weak var _installingApp: StoreApp?
@@ -368,7 +369,7 @@ private extension SourcesViewController
             }
         }
         
-        AppManager.shared.fetchSource(sourceURL: url) { (result) in
+        AppManager.shared.fetchSource(sourceURL: url, managedObjectContext: self.managedObjectContext) { (result) in
             do
             {
                 // Use @Managed before calling perform() to keep
