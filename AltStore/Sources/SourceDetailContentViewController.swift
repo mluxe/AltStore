@@ -409,12 +409,12 @@ private extension SourceDetailContentViewController
             
             if let installedApp = storeApp.installedApp, installedApp.isUpdateAvailable
             {
-                let (updateTask, _) = await AppManager.shared.updateAsync(installedApp, presentingViewController: self)
+                let (updateTask, _) = await AppManager.shared.updateAsync(installedApp, presentingViewController: self.navigationController) // navigationController for correct fallback logic if we're dismissed.
                 task = updateTask
             }
             else
             {
-                let (installTask, _) = await AppManager.shared.installAsync(storeApp, presentingViewController: self)
+                let (installTask, _) = await AppManager.shared.installAsync(storeApp, presentingViewController: self.navigationController) // navigationController for correct fallback logic if we're dismissed.
                 task = installTask
             }
             

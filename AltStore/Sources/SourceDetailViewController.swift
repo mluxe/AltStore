@@ -305,8 +305,16 @@ private extension SourceDetailViewController
     
     func didAddSource()
     {
-        guard let presentingViewController = self.navigationController?.presentingViewController else { return }
-        presentingViewController.dismiss(animated: true)
+        guard let navigationController = self.navigationController else { return }
+        
+        if let presentingViewController = navigationController.presentingViewController
+        {
+            presentingViewController.dismiss(animated: true)
+        }
+        else
+        {
+            navigationController.popToRootViewController(animated: true)
+        }
     }
     
     func didRemoveSource()
