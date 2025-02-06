@@ -20,7 +20,7 @@ static let marketplaceDomain = "https://api.altstore.io"
     {
         // AWS has trouble parsing URLs with encoded `/`, so we replace them with '|' before encoding.
         // This technically breaks any URLs with '|' in them, but YOLO.
-        let encodedADPLink = self.absoluteString.replacingOccurrences(of: "/", with: "|").lowercased()
+        let encodedADPLink = self.absoluteString.replacingOccurrences(of: "/", with: "|")
         return encodedADPLink
     }
     
