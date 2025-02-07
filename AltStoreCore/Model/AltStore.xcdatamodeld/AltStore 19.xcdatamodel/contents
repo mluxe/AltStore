@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23D56" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24B2083" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Account" representedClassName="Account" syncable="YES">
         <attribute name="appleID" attributeType="String"/>
         <attribute name="firstName" attributeType="String"/>
@@ -61,6 +61,7 @@
     </entity>
     <entity name="AppVersion" representedClassName="AppVersion" syncable="YES">
         <attribute name="appBundleID" attributeType="String"/>
+        <attribute name="assetURLs" optional="YES" attributeType="Transformable" valueTransformerName="ALTSecureValueTransformer"/>
         <attribute name="buildVersion" attributeType="String"/>
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="downloadURL" attributeType="URI"/>
@@ -68,12 +69,16 @@
         <attribute name="marketingVersion" optional="YES" attributeType="String"/>
         <attribute name="maxOSVersion" optional="YES" attributeType="String"/>
         <attribute name="minOSVersion" optional="YES" attributeType="String"/>
+        <attribute name="normalizedDownloadURL" optional="YES" attributeType="String"/>
         <attribute name="sha256" optional="YES" attributeType="String"/>
         <attribute name="size" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="sourceID" optional="YES" attributeType="String"/>
         <attribute name="version" attributeType="String"/>
         <relationship name="app" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StoreApp" inverseName="versions" inverseEntity="StoreApp"/>
         <relationship name="latestVersionApp" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StoreApp" inverseName="latestVersion" inverseEntity="StoreApp"/>
+        <fetchIndex name="byNormalizedDownloadURL">
+            <fetchIndexElement property="normalizedDownloadURL" type="Binary" order="ascending"/>
+        </fetchIndex>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="appBundleID"/>
