@@ -65,6 +65,10 @@ extension OperationError
         OperationError(code: .unknown, failureReason: failureReason, sourceFile: file, sourceLine: line)
     }
     
+    static func invalidApp(file: String = #fileID, line: UInt = #line) -> OperationError {
+        OperationError(code: .invalidApp, sourceFile: file, sourceLine: line)
+    }
+    
     static func appNotFound(name: String?) -> OperationError { OperationError(code: .appNotFound, appName: name) }
     static func openAppFailed(name: String) -> OperationError { OperationError(code: .openAppFailed, appName: name) }
     

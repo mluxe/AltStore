@@ -375,8 +375,35 @@ private extension AppMarketplace
         
         if await $storeApp.bundleIdentifier != StoreApp.altstoreAppID
         {
-            // Verify hosted ADP matches source
-            try await self.verifyRemoteADP(for: appVersion)
+            do
+            {
+                // Verify hosted ADP matches source
+                try await self.verifyRemoteADP(for: appVersion)
+            }
+            catch let error as OperationError where error.code == .pledgeRequired
+            {
+                guard let presentingViewController else { throw error }
+                
+                // Attempt to sign-in again in case our Patreon session has expired.
+                try await withCheckedThrowingContinuation { continuation in
+                    PatreonAPI.shared.authenticate(presentingViewController: presentingViewController) { result in
+                        do
+                        {
+                            let account = try result.get()
+                            try account.managedObjectContext?.save()
+                            
+                            continuation.resume()
+                        }
+                        catch
+                        {
+                            continuation.resume(throwing: error)
+                        }
+                    }
+                }
+                
+                // Success, so try to verify ADP again.
+                try await self.verifyRemoteADP(for: appVersion)
+            }
         }
         
         // Install app
@@ -828,7 +855,10 @@ extension AppMarketplace
     
     private func fetchADPManifest(@AsyncManaged for appVersion: AltStoreCore.AppVersion) async throws -> ADPManifest
     {
-        let (downloadURL, assetURLs) = await $appVersion.perform { ($0.downloadURL, $0.assetURLs) }
+        let (downloadURL, assetURLs, appName, isPledgeRequired) = try await $appVersion.perform { (appVersion) in
+            guard let storeApp = appVersion.storeApp else { throw OperationError.invalidApp() }
+            return (appVersion.downloadURL, appVersion.assetURLs, storeApp.name, storeApp.isPledgeRequired)
+        }
         
         let manifestURL: URL
         if let assetURL = assetURLs?["manifest"]
@@ -844,9 +874,25 @@ extension AppMarketplace
             manifestURL = downloadURL.appending(path: "manifest.json")
         }
         
+        let isPatreonURL = manifestURL.absoluteString.lowercased().contains("patreon.com")
         let request = URLRequest(url: manifestURL)
-        let adp = try await self.send(request, expecting: ADPManifest.self)
-        return adp
+        
+        do
+        {
+            let adp = try await self.send(request, expecting: ADPManifest.self)
+            return adp
+        }
+        catch let error as URLError where isPatreonURL && isPledgeRequired
+        {
+            switch error.code
+            {
+            case .noPermissionsToReadFile, .badServerResponse:
+                // Patreon URL and app requires pledge, so assume this error means we need to be re-authenticated.
+                throw OperationError.pledgeRequired(appName: appName)
+                
+            default: throw error
+            }
+        }
     }
     
     private func manifestURL(forPatreonPost postURL: URL) async throws -> URL
