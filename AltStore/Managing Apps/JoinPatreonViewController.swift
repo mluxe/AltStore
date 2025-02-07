@@ -37,7 +37,7 @@ class JoinPatreonViewController: UIViewController
         super.viewDidLoad()
         
         self.title = NSLocalizedString("Join Patreon", comment: "")
-        self.view.backgroundColor = .white
+        self.view.backgroundColor = .systemBackground
         
         self.textLabel.text = String(format: NSLocalizedString("To download %@, join this creator's Patreon by pressing “Join for free” on the next screen.", comment: ""), self.$storeApp.name)
         
