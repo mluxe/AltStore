@@ -48,7 +48,8 @@ public extension Fetchable
     {
         let registeredObjects = context.registeredObjects.lazy.compactMap({ $0 as? Self }).filter({ predicate?.evaluate(with: $0) != false })
         
-        if let managedObject = registeredObjects.first, returnFirstResult
+        // Registered objects may be deleted, so grab first non-deleted managedObject.
+        if let managedObject = registeredObjects.first(where: { !$0.isDeleted }), returnFirstResult
         {
             return [managedObject]
         }
