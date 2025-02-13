@@ -789,7 +789,15 @@ extension AddSourceViewController
     {
         guard Section(rawValue: indexPath.section) != .add else { return }
         
-        let source = self.dataSource.item(at: indexPath)
+        var source = self.dataSource.item(at: indexPath)
+        
+        let predicate = NSPredicate(format: "%K == %@", #keyPath(Source.identifier), source.identifier)
+        if let localSource = Source.first(satisfying: predicate, in: DatabaseManager.shared.viewContext)
+        {
+            // This source exists locally, so show local version instead.
+            source = localSource
+        }
+        
         self.performSegue(withIdentifier: "showSourceDetails", sender: source)
     }
 }
