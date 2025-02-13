@@ -435,6 +435,18 @@ private extension SourcesViewController
     
     func showSourceDetails(for source: Source)
     {
+        var source = source
+        
+        if source.managedObjectContext != DatabaseManager.shared.viewContext
+        {
+            let predicate = NSPredicate(format: "%K == %@", #keyPath(Source.identifier), source.identifier)
+            if let localSource = Source.first(satisfying: predicate, in: DatabaseManager.shared.viewContext)
+            {
+                // This source exists locally, so show local version instead.
+                source = localSource
+            }
+        }
+        
         self.performSegue(withIdentifier: "showSourceDetails", sender: source)
     }
     
