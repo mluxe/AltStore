@@ -28,7 +28,6 @@ class SourcesViewController: UICollectionViewController
         }
     }
     
-    private let managedObjectContext = DatabaseManager.shared.persistentContainer.newBackgroundSavingViewContext()
     private lazy var dataSource = self.makeDataSource()
     
     private var placeholderView: RSTPlaceholderView!
@@ -371,7 +370,8 @@ private extension SourcesViewController
             }
         }
         
-        AppManager.shared.fetchSource(sourceURL: url, managedObjectContext: self.managedObjectContext) { (result) in
+        let context = DatabaseManager.shared.persistentContainer.newBackgroundSavingViewContext()
+        AppManager.shared.fetchSource(sourceURL: url, managedObjectContext: context) { (result) in
             do
             {
                 // Use @Managed before calling perform() to keep
