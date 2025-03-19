@@ -15,7 +15,7 @@ extension PatreonAPI
     struct MediaAttributes: Decodable
     {
         var file_name: String
-        var mimetype: String
+        var mimetype: String?
     }
 }
 
@@ -25,7 +25,7 @@ extension PatreonAPI
     {
         public var identifier: String
         public var filename: String
-        public var mimeType: String
+        public var mimeType: String?
         
         init(response: PatreonAPI.MediaResponse)
         {
