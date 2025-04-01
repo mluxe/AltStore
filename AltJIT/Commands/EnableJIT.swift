@@ -25,6 +25,9 @@ struct EnableJIT: PythonCommand
     @Option(name: .shortAndLong, help: "Number of seconds to wait when connecting to an iOS device before operation is cancelled.")
     var timeout: TimeInterval = 90.0
     
+    @Flag(name: .long, help: "Use legacy device connection (iOS 17.0 - 17.3.x)")
+    var legacy: Bool = false
+    
     // PythonCommand
     var pythonPath: String?
     
@@ -89,7 +92,17 @@ private extension EnableJIT
         {
             Logger.main.info("Starting RSD tunnel with timeout: \(self.timeout)")
             
-            let process = try Process.launch(.python3, arguments: ["-u", "-m", "pymobiledevice3", "remote", "start-quic-tunnel", "--udid", self.udid], environment: self.processEnvironment)
+            let arguments: [String]
+            if self.legacy
+            {
+                arguments = ["-u", "-m", "pymobiledevice3", "remote", "start-tunnel", "--udid", self.udid]
+            }
+            else
+            {
+                arguments = ["-u", "-m", "pymobiledevice3", "lockdown", "start-tunnel", "--udid", self.udid]
+            }
+            
+            let process = try Process.launch(.python3, arguments: arguments, environment: self.processEnvironment)
             
             do
             {

@@ -50,8 +50,16 @@ class JITManager
         
         if #available(macOS 13, *), device.osVersion.majorVersion >= 17
         {
-            // iOS 17+
-            try await self.enableModernUnsignedCodeExecution(process: process, device: device)
+            if device.osVersion.majorVersion >= 18 || device.osVersion.minorVersion >= 4
+            {
+                // iOS 17.4+
+                try await self.enableModernUnsignedCodeExecution(process: process, device: device, useLegacyConnection: false)
+            }
+            else
+            {
+                // iOS 17 - 17.3.x
+                try await self.enableModernUnsignedCodeExecution(process: process, device: device, useLegacyConnection: true)
+            }
         }
         else
         {
@@ -118,7 +126,7 @@ private extension JITManager
         }
     }
     
-    func enableModernUnsignedCodeExecution(process: AppProcess, device: ALTDevice) async throws
+    func enableModernUnsignedCodeExecution(process: AppProcess, device: ALTDevice, useLegacyConnection: Bool) async throws
     {
         do
         {
@@ -140,6 +148,11 @@ private extension JITManager
             if let timeout = UserDefaults.standard.altJITTimeout
             {
                 arguments += ["--timeout", String(timeout)]
+            }
+            
+            if useLegacyConnection
+            {
+                arguments += ["--legacy"]
             }
             
             self.authorization = try Process.runAsAdmin(URL.altjit.path, arguments: arguments, authorization: self.authorization)
