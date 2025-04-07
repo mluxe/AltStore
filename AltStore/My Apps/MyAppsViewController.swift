@@ -308,11 +308,16 @@ private extension MyAppsViewController
     func makeActiveAppsDataSource() -> RSTFetchedResultsCollectionViewPrefetchingDataSource<InstalledApp, UIImage>
     {
         let fetchRequest = InstalledApp.activeAppsFetchRequest()
+        fetchRequest.returnsObjectsAsFaults = false
         fetchRequest.relationshipKeyPathsForPrefetching = [#keyPath(InstalledApp.storeApp)]
+        
+        #if MARKETPLACE
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \InstalledApp.name, ascending: true)]
+        #else
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \InstalledApp.expirationDate, ascending: true),
                                         NSSortDescriptor(keyPath: \InstalledApp.refreshedDate, ascending: false),
                                         NSSortDescriptor(keyPath: \InstalledApp.name, ascending: true)]
-        fetchRequest.returnsObjectsAsFaults = false
+        #endif
         
         let dataSource = RSTFetchedResultsCollectionViewPrefetchingDataSource<InstalledApp, UIImage>(fetchRequest: fetchRequest, managedObjectContext: DatabaseManager.shared.viewContext)
         dataSource.cellIdentifierHandler = { _ in "AppCell" }
