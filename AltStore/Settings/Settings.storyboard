@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="5Rz-4h-jJ8">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="5Rz-4h-jJ8">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -30,7 +30,7 @@
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <stackView opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="hru-pm-ZI3">
-                                    <rect key="frame" x="88.5" y="46" width="198" height="34.5"/>
+                                    <rect key="frame" x="61.5" y="46" width="252.5" height="34.5"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B8Q-e7-beR" userLabel="Mastodon">
                                             <rect key="frame" x="0.0" y="0.0" width="34.5" height="34.5"/>
@@ -60,8 +60,22 @@
                                                 <action selector="followAltStoreThreads" destination="aMk-Xp-UL8" eventType="primaryActionTriggered" id="0f0-KK-7lE"/>
                                             </connections>
                                         </button>
-                                        <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYZ-Vu-RzK" userLabel="Twitter">
+                                        <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KtF-c1-462" userLabel="Bluesky">
                                             <rect key="frame" x="109" y="0.0" width="34.5" height="34.5"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" secondItem="KtF-c1-462" secondAttribute="height" id="Ii7-Ll-gJt"/>
+                                                <constraint firstAttribute="width" constant="34.5" id="rhz-Iv-kSv"/>
+                                            </constraints>
+                                            <state key="normal" title=""/>
+                                            <buttonConfiguration key="configuration" style="plain">
+                                                <backgroundConfiguration key="background" image="Bluesky" imageContentMode="scaleAspectFit"/>
+                                            </buttonConfiguration>
+                                            <connections>
+                                                <action selector="followAltStoreBluesky" destination="aMk-Xp-UL8" eventType="primaryActionTriggered" id="a1I-V1-N2s"/>
+                                            </connections>
+                                        </button>
+                                        <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYZ-Vu-RzK" userLabel="Twitter">
+                                            <rect key="frame" x="163.5" y="0.0" width="34.5" height="34.5"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="34.5" id="LKG-L3-APj"/>
                                                 <constraint firstAttribute="width" secondItem="uYZ-Vu-RzK" secondAttribute="height" id="UyA-cy-ol3"/>
@@ -75,7 +89,7 @@
                                             </connections>
                                         </button>
                                         <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oqj-4S-I9l" userLabel="GitHub">
-                                            <rect key="frame" x="163.5" y="0.0" width="34.5" height="34.5"/>
+                                            <rect key="frame" x="218" y="0.0" width="34.5" height="34.5"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="34.5" id="BEp-uf-a6X"/>
                                                 <constraint firstAttribute="width" secondItem="oqj-4S-I9l" secondAttribute="height" id="ye3-ez-e16"/>
@@ -89,6 +103,9 @@
                                             </connections>
                                         </button>
                                     </subviews>
+                                    <constraints>
+                                        <constraint firstItem="KtF-c1-462" firstAttribute="width" secondItem="KtF-c1-462" secondAttribute="height" id="8LJ-My-U5g"/>
+                                    </constraints>
                                 </stackView>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="900" text="Version 2.0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5u7-mb-jJj">
                                     <rect key="frame" x="151.5" y="108" width="72.5" height="17"/>
@@ -962,6 +979,7 @@
                         <outlet property="accountNameLabel" destination="CnN-M1-AYK" id="Ldc-Py-Bix"/>
                         <outlet property="accountTypeLabel" destination="434-MW-Den" id="mNB-QE-4Jg"/>
                         <outlet property="backgroundRefreshSwitch" destination="DPu-zD-Als" id="eiG-Hv-Vko"/>
+                        <outlet property="blueskyButton" destination="KtF-c1-462" id="coJ-m1-YNe"/>
                         <outlet property="disableResponseCachingSwitch" destination="e30-w4-5fk" id="Duy-Yb-eo1"/>
                         <outlet property="enforceThreeAppLimitSwitch" destination="Oie-te-KSQ" id="jKn-t1-gyk"/>
                         <outlet property="githubButton" destination="oqj-4S-I9l" id="sxB-LE-gA2"/>
@@ -1465,6 +1483,7 @@ Settings by i cons from the Noun Project</string>
         </scene>
     </scenes>
     <resources>
+        <image name="Bluesky" width="300" height="300"/>
         <image name="GitHub" width="130" height="130"/>
         <image name="Mastodon" width="130" height="130"/>
         <image name="Next" width="18" height="18"/>
