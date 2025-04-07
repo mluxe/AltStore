@@ -446,8 +446,8 @@ private extension AppMarketplace
     
     func verifyRemoteADP(@AsyncManaged for appVersion: AltStoreCore.AppVersion) async throws
     {
-        let (appName, bundleID, marketplaceID, version, buildVersion) = await $appVersion.perform {
-            ($0.storeApp?.name, $0.appBundleID, $0.storeApp?._marketplaceID, $0.version, $0.buildVersion)
+        let (appName, bundleID, marketplaceID, version, buildVersion, sourceID, sourceURL) = await $appVersion.perform {
+            ($0.storeApp?.name, $0.appBundleID, $0.storeApp?._marketplaceID, $0.version, $0.buildVersion, $0.storeApp?.sourceIdentifier, $0.storeApp?.source?.sourceURL)
         }
         
         guard let marketplaceID else { throw OperationError.unknownMarketplaceID(appName: appName ?? bundleID) }
@@ -480,6 +480,33 @@ private extension AppMarketplace
                 
                 // Throw error for all other apps/versions.
                 default: throw error
+                }
+            }
+            
+            let expectedSourceURL: URL?
+            switch bundleID
+            {
+            case "com.xitrix.iTorrent2": expectedSourceURL = URL(string: "https://xitrix.github.io/iTorrent/AltStoreEU.json")!
+            case "MikeMichael225.qBitControl": expectedSourceURL = URL(string: "https://raw.githubusercontent.com/michael-128/qbitcontrol-releases/main/source.json")!
+            default: expectedSourceURL = nil
+            }
+            
+            // Ensure source ID matches expected source ID.
+            if let sourceURL, let sourceID, let expectedSourceURL
+            {
+                let expectedSourceID = try! expectedSourceURL.normalized()
+                if sourceID != expectedSourceID
+                {
+                    // Source does not match expected source, so check if new source is recommended (visible or not).
+                    if let recommendedSources = UserDefaults.shared.recommendedSources, recommendedSources.contains(where: { $0.identifier == sourceID })
+                    {
+                        // Source is recommended, so allow installation.
+                    }
+                    else
+                    {
+                        // Assume source is unofficial, so block installation.
+                        throw VerificationError.incorrectSource(sourceURL: sourceURL, expectedSourceURL: expectedSourceURL, app: appVersion)
+                    }
                 }
             }
         }

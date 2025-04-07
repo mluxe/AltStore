@@ -31,6 +31,9 @@ extension VerificationError
         // 2xx = Permissions
         case undeclaredPermissions = 201
         case addedPermissions = 202
+        
+        // 3xx = Sources
+        case incorrectSource = 301
     }
     
     static func iOSVersionNotSupported(app: AppProtocol, osVersion: OperatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersion, requiredOSVersion: OperatingSystemVersion?) -> VerificationError {
@@ -64,6 +67,10 @@ extension VerificationError
     static func addedPermissions(_ permissions: [any ALTAppPermission], appVersion: AppVersion) -> VerificationError {
         VerificationError(code: .addedPermissions, app: appVersion, permissions: permissions)
     }
+    
+    static func incorrectSource(sourceURL: URL, expectedSourceURL: URL, app: AppProtocol) -> VerificationError {
+        VerificationError(code: .incorrectSource, app: app, sourceURL: sourceURL, expectedSourceURL: expectedSourceURL)
+    }
 }
 
 struct VerificationError: ALTLocalizedError
@@ -88,6 +95,9 @@ struct VerificationError: ALTLocalizedError
     
     @UserInfoValue var version: String?
     @UserInfoValue var expectedVersion: String?
+    
+    @UserInfoValue var sourceURL: URL?
+    @UserInfoValue var expectedSourceURL: URL?
     
     @UserInfoValue
     var permissions: [any ALTAppPermission]?
@@ -188,6 +198,18 @@ struct VerificationError: ALTLocalizedError
             let baseMessage = String(format: NSLocalizedString("%@ requires more permissions than the version that is already installed", comment: ""), appName)
             
             let failureReason = [baseMessage, installedVersion].compactMap { $0 }.joined(separator: " ") + "."
+            return failureReason
+            
+        case .incorrectSource:
+            let appName = self.$app.name ?? NSLocalizedString("The app", comment: "")
+
+            var failureReason = String(format: NSLocalizedString("%@ can only be downloaded from its original source", comment: ""), appName)
+            if let expectedSourceURL
+            {
+                failureReason += " (\(expectedSourceURL.absoluteString))"
+            }
+            
+            failureReason += "."
             return failureReason
         }
     }
