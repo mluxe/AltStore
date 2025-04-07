@@ -213,7 +213,6 @@ public class StoreApp: NSManagedObject, Decodable, Fetchable
         case marketplaceID
         case developerName
         case localizedDescription
-        case localizedDescriptions = "_localizedDescriptions"
         case iconURL
         case screenshots
         case tintColor
@@ -225,12 +224,17 @@ public class StoreApp: NSManagedObject, Decodable, Fetchable
         case patreon
         case category
         
+        // Localized
+        case localizedDescriptions
+        case localizedSubtitles
+        
         // Legacy
         case version
         case versionDescription
         case versionDate
         case downloadURL
         case screenshotURLs
+        case legacyLocalizedDescriptions = "_localizedDescriptions"
     }
     
     public required init(from decoder: Decoder) throws
@@ -248,7 +252,7 @@ public class StoreApp: NSManagedObject, Decodable, Fetchable
             self.developerName = try container.decode(String.self, forKey: .developerName)
             self.iconURL = try container.decode(URL.self, forKey: .iconURL)
             
-            if let localizedDescription = try container.decodeLocalizedValue(String.self, forKey: .localizedDescriptions)
+            if let localizedDescription = try container.decodeLocalizedValue(String.self, forKey: .localizedDescriptions) ?? container.decodeLocalizedValue(String.self, forKey: .legacyLocalizedDescriptions)
             {
                 // Found matching localized description.
                 self.localizedDescription = localizedDescription
@@ -259,7 +263,17 @@ public class StoreApp: NSManagedObject, Decodable, Fetchable
                 self.localizedDescription = try container.decode(String.self, forKey: .localizedDescription)
             }
             
-            self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
+            if let localizedSubtitle = try container.decodeLocalizedValue(String.self, forKey: .localizedSubtitles)
+            {
+                // Found matching localized subtitle.
+                self.subtitle = localizedSubtitle
+            }
+            else
+            {
+                // No localized match, or no localized subitles provided, so fall back to `subtitle`.
+                self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
+            }
+            
             self.isBeta = try container.decodeIfPresent(Bool.self, forKey: .isBeta) ?? false
             
             // Required for Marketplace apps, but we'll verify later.

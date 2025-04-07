@@ -43,6 +43,10 @@ public class NewsItem: NSManagedObject, Decodable, Fetchable
         case externalURL = "url"
         case appID
         case notify
+        
+        // Localized
+        case localizedTitles
+        case localizedCaptions
     }
     
     private override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?)
@@ -60,8 +64,23 @@ public class NewsItem: NSManagedObject, Decodable, Fetchable
         self.identifier = try container.decode(String.self, forKey: .identifier)
         self.date = try container.decode(Date.self, forKey: .date)
         
-        self.title = try container.decode(String.self, forKey: .title)
-        self.caption = try container.decode(String.self, forKey: .caption)
+        if let localizedTitle = try container.decodeLocalizedValue(String.self, forKey: .localizedTitles)
+        {
+            self.title = localizedTitle
+        }
+        else
+        {
+            self.title = try container.decode(String.self, forKey: .title)
+        }
+        
+        if let localizedCaption = try container.decodeLocalizedValue(String.self, forKey: .localizedCaptions)
+        {
+            self.caption = localizedCaption
+        }
+        else
+        {
+            self.caption = try container.decode(String.self, forKey: .caption)
+        }
         
         if let tintColorHex = try container.decodeIfPresent(String.self, forKey: .tintColor)
         {

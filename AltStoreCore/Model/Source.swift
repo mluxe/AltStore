@@ -120,7 +120,6 @@ public class Source: NSManagedObject, Fetchable, Decodable
         case sourceURL
         case subtitle
         case localizedDescription = "description"
-        case localizedDescriptions = "_localizedDescriptions"
         case iconURL
         case headerImageURL = "headerURL"
         case websiteURL = "website"
@@ -131,6 +130,13 @@ public class Source: NSManagedObject, Fetchable, Decodable
         case news
         case featuredApps
         case userInfo
+        
+        // Localized
+        case localizedDescriptions
+        case localizedSubtitles
+        
+        // Legacy
+        case legacyLocalizedDescriptions = "_localizedDescriptions"
     }
     
     private override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?)
@@ -151,19 +157,27 @@ public class Source: NSManagedObject, Fetchable, Decodable
             self.name = try container.decode(String.self, forKey: .name)
             
             // Optional Values
-            self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
             self.websiteURL = try container.decodeIfPresent(URL.self, forKey: .websiteURL)
             self.iconURL = try container.decodeIfPresent(URL.self, forKey: .iconURL)
             self.headerImageURL = try container.decodeIfPresent(URL.self, forKey: .headerImageURL)
             self.patreonURL = try container.decodeIfPresent(URL.self, forKey: .patreonURL)
             
-            if let localizedDescription = try container.decodeLocalizedValue(String.self, forKey: .localizedDescriptions)
+            if let localizedDescription = try container.decodeLocalizedValue(String.self, forKey: .localizedDescriptions) ?? container.decodeLocalizedValue(String.self, forKey: .legacyLocalizedDescriptions)
             {
                 self.localizedDescription = localizedDescription
             }
             else
             {
                 self.localizedDescription = try container.decodeIfPresent(String.self, forKey: .localizedDescription)
+            }
+            
+            if let localizedSubtitle = try container.decodeLocalizedValue(String.self, forKey: .localizedSubtitles)
+            {
+                self.subtitle = localizedSubtitle
+            }
+            else
+            {
+                self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
             }
             
             if let tintColorHex = try container.decodeIfPresent(String.self, forKey: .tintColor)
