@@ -644,6 +644,9 @@ extension FeaturedViewController
             
             buttonView.button.removeAction(identifiedBy: .showAllApps, for: .primaryActionTriggered)
             
+            // Hide "See All" button if there is only 1 (or no) apps in source.
+            buttonView.button.isHidden = (storeApp.source?.apps.count ?? 0) <= 1
+            
             if let source = storeApp.source
             {
                 let action = UIAction(identifier: .showAllApps) { [weak self] _ in
