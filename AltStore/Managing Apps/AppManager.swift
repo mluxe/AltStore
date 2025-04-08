@@ -346,7 +346,7 @@ extension AppManager
     
     func add(@AsyncManaged _ source: Source, message: String? = NSLocalizedString("Make sure to only add sources that you trust.", comment: ""), presentingViewController: UIViewController) async throws
     {
-        let (sourceName, sourceURL, sourceID) = await $source.perform { ($0.name, $0.sourceURL, $0.identifier) }
+        let (sourceName, sourceURL) = await $source.perform { ($0.name, $0.sourceURL) }
         
         let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
         async let fetchedSource = try await self.fetchSource(sourceURL: sourceURL, managedObjectContext: context) // Fetch source async while showing alert.
@@ -361,13 +361,6 @@ extension AppManager
         
         // This is just a sanity check, so pass nil for existingSource to keep code simple.
         guard !sourceExists else { throw SourceError.duplicate(source, existingSource: nil) }
-        
-        #if MARKETPLACE
-        if sourceID != Source.altStoreIdentifier
-        {
-            guard let recommendedSources = UserDefaults.shared.recommendedSources, recommendedSources.contains(where: { $0.identifier == sourceID }) else { throw SourceError.unsupported(source) }
-        }
-        #endif
         
         try await context.performAsync {
             try context.save()
