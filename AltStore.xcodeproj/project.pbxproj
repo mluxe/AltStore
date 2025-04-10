@@ -4758,7 +4758,7 @@
 			repositoryURL = "https://github.com/TelemetryDeck/SwiftClient";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.5.1;
+				minimumVersion = 2.9.3;
 			};
 		};
 		D58D5F2C26DFE68E00E55E38 /* XCRemoteSwiftPackageReference "LaunchAtLogin" */ = {
