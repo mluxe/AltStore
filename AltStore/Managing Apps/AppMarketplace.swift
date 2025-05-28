@@ -707,9 +707,8 @@ private extension AppMarketplace
                 if UserDefaults.shared.shouldManageInstalledApps
                 {
                     let didInstallSuccessfully = try await self.isAppVersionInstalled(appVersion, for: storeApp)
-                    if !didInstallSuccessfully
-                    {
-                        // App version does not match the version we attempted to install, so assume error occured.
+                    guard didInstallSuccessfully || installation.progress.fractionCompleted >= 1 else {
+                        // Install progress is less than 100%, _and_ app version does not match the version we attempted to install, so assume error occured.
                         throw CancellationError()
                     }
                 }
