@@ -392,7 +392,6 @@
 		D557A4812AE85BB0007D0DCF /* Pledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557A4802AE85BB0007D0DCF /* Pledge.swift */; };
 		D557A4832AE85DB7007D0DCF /* PledgeReward.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557A4822AE85DB7007D0DCF /* PledgeReward.swift */; };
 		D557A4852AE88227007D0DCF /* PledgeTier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557A4842AE88227007D0DCF /* PledgeTier.swift */; };
-		D55D3EBD2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */; };
 		D561AF822B21669400BF59C6 /* VerifyAppPledgeOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D561AF812B21669400BF59C6 /* VerifyAppPledgeOperation.swift */; };
 		D561B2EB28EF5A4F006752E4 /* AltSign-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = D561B2EA28EF5A4F006752E4 /* AltSign-Dynamic */; };
 		D561B2ED28EF5A4F006752E4 /* AltSign-Dynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = D561B2EA28EF5A4F006752E4 /* AltSign-Dynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -1075,7 +1074,6 @@
 		D557A4802AE85BB0007D0DCF /* Pledge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pledge.swift; sourceTree = "<group>"; };
 		D557A4822AE85DB7007D0DCF /* PledgeReward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeReward.swift; sourceTree = "<group>"; };
 		D557A4842AE88227007D0DCF /* PledgeTier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeTier.swift; sourceTree = "<group>"; };
-		D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = InstallMarketplaceApp.storyboard; sourceTree = "<group>"; };
 		D561AF812B21669400BF59C6 /* VerifyAppPledgeOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAppPledgeOperation.swift; sourceTree = "<group>"; };
 		D56842A82C62A1A800FB1AB4 /* KeyedDecodingContainer+LocalizedValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyedDecodingContainer+LocalizedValues.swift"; sourceTree = "<group>"; };
 		D56915052AD5D75B00A2B747 /* Regex+Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Regex+Permissions.swift"; sourceTree = "<group>"; };
@@ -2009,7 +2007,6 @@
 				BF88F97124F8727D00BB75DF /* AppManagerErrors.swift */,
 				D5AE997A2B64791E0068B366 /* AppMarketplace.swift */,
 				D5CF17252B96DD27002EC4C7 /* InstallMarketplaceAppViewController.swift */,
-				D55D3EBC2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard */,
 				D5399FAD2BE56B030038DDEF /* JoinPatreonViewController.swift */,
 				D5399FAF2BE56B120038DDEF /* JoinPatreonViewController.xib */,
 			);
@@ -2944,7 +2941,6 @@
 				BF44EEF3246B3A17002A52F2 /* AltBackup.ipa in Resources */,
 				D56D21422B7D9C41007641C5 /* AltIcons.plist in Resources */,
 				BF770E6922BD57DD002A40FE /* Silence.m4a in Resources */,
-				D55D3EBD2B973F9E00AF2839 /* InstallMarketplaceApp.storyboard in Resources */,
 				BFD247772284B9A700981D42 /* Assets.xcassets in Resources */,
 				D5784E3F2CC2E67B00DAC00E /* AltMarketplace.cer in Resources */,
 				BFF0B6922321A305007A79E1 /* AboutPatreonHeaderView.xib in Resources */,
